@@ -1,9 +1,16 @@
+import { AssessmentActionHandler } from "./AssessmentActionHandler.js";
+
 export class AssessmentCoordinator {
   constructor(renderer, stateManager, exportManager, importManager) {
     this.renderer = renderer;
     this.stateManager = stateManager;
     this.exportManager = exportManager;
     this.importManager = importManager;
+    this.actionHandler = new AssessmentActionHandler(
+      stateManager,
+      exportManager,
+      () => this.render()
+    );
   }
 
   bindEvents() {
@@ -25,92 +32,7 @@ export class AssessmentCoordinator {
       return;
     }
 
-    const action = actionElement.dataset.act;
-    const value = actionElement.dataset.val;
-
-    if (action === "theme") {
-      this.stateManager.toggleTheme();
-      this.render();
-      return;
-    }
-
-    if (action === "cpToggle") {
-      this.stateManager.toggleColorPicker();
-      this.render();
-      return;
-    }
-
-    if (action === "cpick") {
-      this.stateManager.setAccentColor(value);
-      this.stateManager.closeColorPicker();
-      this.render();
-      return;
-    }
-
-    if (action === "sec") {
-      this.stateManager.setActiveSection(value === "ALL" ? null : value);
-      this.render();
-      return;
-    }
-
-    if (action === "mode") {
-      this.stateManager.setMode(value);
-      this.render();
-      return;
-    }
-
-    if (action === "focusToggle") {
-      this.stateManager.toggleFocusedView();
-      this.render();
-      return;
-    }
-
-    if (action === "secsm") {
-      this.stateManager.setActiveSection(value);
-      this.stateManager.setMode("assess");
-      this.render();
-      return;
-    }
-
-    if (action === "jumpto") {
-      this.stateManager.jumpToQuestion(actionElement.dataset.id, actionElement.dataset.sec);
-      this.render();
-      return;
-    }
-
-    if (action === "tier") {
-      this.handleTierSelection(
-        actionElement.dataset.id,
-        Number.parseInt(actionElement.dataset.tn, 10)
-      );
-      return;
-    }
-
-    if (action === "clear") {
-      this.stateManager.clearScore(actionElement.dataset.id);
-      this.render();
-      return;
-    }
-
-    if (action === "nav") {
-      this.stateManager.navigate(Number.parseInt(value, 10));
-      this.render();
-      return;
-    }
-
-    if (action === "dlxl") {
-      this.exportManager.downloadExcel();
-      return;
-    }
-
-    if (action === "sharexl") {
-      this.exportManager.shareExcel();
-      return;
-    }
-
-    if (action === "dljson") {
-      this.exportManager.downloadJson();
-    }
+    this.actionHandler.handle(actionElement);
   }
 
   handleOutsideClick(event) {
@@ -201,17 +123,4 @@ export class AssessmentCoordinator {
     }
   }
 
-  handleTierSelection(questionId, tierNumber) {
-    const shouldAdvance = this.stateManager.updateScore(questionId, tierNumber);
-
-    if (!shouldAdvance) {
-      this.render();
-      return;
-    }
-
-    window.setTimeout(() => {
-      this.stateManager.moveToNextQuestion();
-      this.render();
-    }, 300);
-  }
 }

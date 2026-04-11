@@ -1,24 +1,35 @@
 import { AppConstants } from "../constants.js";
+import { AssessmentSessionManager } from "./AssessmentSessionManager.js";
 
 export class AssessmentStateManager {
-  constructor(dataManager, storageManager) {
+  constructor(dataManager, storageManager, workflowManager) {
     this.dataManager = dataManager;
     this.storageManager = storageManager;
+    this.workflowManager = workflowManager;
     this.state = {
       currentIndex: 0,
-      mode: "assess",
+      mode: "home",
       activeSection: null,
       accentColor: AppConstants.accentColors[0],
+      checkpointSection: null,
       isFocusedView: false,
       isColorPickerOpen: false,
       isDarkTheme: true,
+      lastQuestionId: null,
+      lastSection: null,
+      questionFilter: "all",
       scores: {},
     };
+    this.sessionManager = new AssessmentSessionManager(
+      this.state,
+      dataManager,
+      storageManager,
+      workflowManager
+    );
   }
 
   initialize() {
-    this.state.scores = this.storageManager.loadScores(this.dataManager.getDefaultScores());
-    this.state.isDarkTheme = this.storageManager.loadThemePreference();
+    this.sessionManager.initialize(this.dataManager.getDefaultScores());
     this.applyTheme();
   }
 
@@ -27,7 +38,11 @@ export class AssessmentStateManager {
   }
 
   getFilteredQuestions() {
-    return this.dataManager.getFilteredQuestions(this.state.activeSection);
+    return this.workflowManager.getQuestionQueue(
+      this.state.activeSection,
+      this.state.questionFilter,
+      this.state.scores
+    );
   }
 
   getCurrentQuestion() {
@@ -53,11 +68,14 @@ export class AssessmentStateManager {
 
   setActiveSection(section) {
     this.state.activeSection = section;
+    this.state.questionFilter = "all";
     this.state.currentIndex = 0;
+    this.state.checkpointSection = null;
   }
 
   setMode(mode) {
     this.state.mode = mode;
+    this.state.checkpointSection = null;
     if (mode !== "assess") {
       this.state.isFocusedView = false;
     }
@@ -68,15 +86,44 @@ export class AssessmentStateManager {
     this.state.mode = "assess";
   }
 
+  openHome() {
+    this.sessionManager.openHome();
+  }
+
+  startResumeFlow() {
+    this.sessionManager.startResumeFlow();
+  }
+
+  startReviewFlow(section = null) {
+    this.sessionManager.startReviewFlow(section);
+  }
+
+  startSectionFlow(section) {
+    this.sessionManager.startSectionFlow(section);
+  }
+
+  startFirstSectionFlow() {
+    this.sessionManager.startFirstSectionFlow();
+  }
+
+  continueToNextSection() {
+    this.sessionManager.continueToNextSection();
+  }
+
+  showSectionCheckpoint() {
+    this.sessionManager.showSectionCheckpoint();
+  }
+
+  shouldShowCheckpointAfterAdvance() {
+    return this.sessionManager.shouldShowCheckpointAfterAdvance();
+  }
+
+  isReviewMode() {
+    return this.sessionManager.isReviewMode();
+  }
+
   jumpToQuestion(questionId, section) {
-    this.state.activeSection = section;
-    this.state.mode = "assess";
-
-    const questionIndex = this.getFilteredQuestions().findIndex(
-      (question) => question.id === questionId
-    );
-
-    this.state.currentIndex = questionIndex >= 0 ? questionIndex : 0;
+    this.sessionManager.jumpToQuestion(questionId, section);
   }
 
   clearScore(questionId) {
@@ -106,12 +153,15 @@ export class AssessmentStateManager {
   navigate(step) {
     const maxIndex = Math.max(this.getFilteredQuestions().length - 1, 0);
     this.state.currentIndex = Math.max(0, Math.min(maxIndex, this.state.currentIndex + step));
+    this.sessionManager.recordCurrentQuestion();
   }
 
   moveToNextQuestion() {
     if (this.state.currentIndex < this.getFilteredQuestions().length - 1) {
       this.state.currentIndex += 1;
     }
+
+    this.sessionManager.recordCurrentQuestion();
   }
 
   replaceScores(scores) {
@@ -125,11 +175,26 @@ export class AssessmentStateManager {
     const maxIndex = Math.max(filteredQuestions.length - 1, 0);
     this.state.currentIndex = Math.min(this.state.currentIndex, maxIndex);
 
+    if (this.state.mode === "assess") {
+      this.sessionManager.recordCurrentQuestion();
+    }
+
     return {
       ...this.state,
+      checkpoint: this.workflowManager.buildCheckpoint(this.state.checkpointSection, this.state.scores),
       filteredQuestions,
       answeredCount,
+      isAssessmentComplete: this.workflowManager.isAssessmentComplete(this.state.scores),
+      isReviewMode: this.isReviewMode(),
+      questionFilterLabel: this.state.questionFilter === "unanswered" ? "Unanswered Only" : "All Questions",
+      resumeTarget: this.workflowManager.getResumeTarget(
+        this.state.lastQuestionId,
+        this.state.lastSection,
+        this.state.scores
+      ),
+      sectionQueues: this.workflowManager.buildSectionQueues(this.state.scores),
       totalQuestions: this.dataManager.questions.length,
+      unansweredCount: this.dataManager.questions.length - answeredCount,
       progressPercent: Math.round((answeredCount / this.dataManager.questions.length) * 100),
       sections: this.dataManager.buildSummary(this.state.scores),
     };

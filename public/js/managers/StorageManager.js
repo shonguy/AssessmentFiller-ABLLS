@@ -34,4 +34,21 @@ export class StorageManager {
       // Ignore storage failures.
     }
   }
+
+  loadWorkflowState(defaultState) {
+    try {
+      const savedValue = localStorage.getItem(AppConstants.storageKeys.workflow);
+      return savedValue ? { ...defaultState, ...JSON.parse(savedValue) } : defaultState;
+    } catch (_error) {
+      return defaultState;
+    }
+  }
+
+  saveWorkflowState(workflowState) {
+    try {
+      localStorage.setItem(AppConstants.storageKeys.workflow, JSON.stringify(workflowState));
+    } catch (_error) {
+      // Ignore storage failures.
+    }
+  }
 }

@@ -16,8 +16,16 @@ export class AssessmentRenderer {
       return;
     }
 
-    const sectionsHtml = this.renderSectionButtons(viewModel);
     const bodyHtml = this.bodyRenderer.render(viewModel);
+    if (viewModel.mode === "home" || viewModel.mode === "checkpoint") {
+      this.rootElement.innerHTML = `
+        ${this.renderTopbar(viewModel)}
+        ${bodyHtml}
+      `;
+      return;
+    }
+
+    const sectionsHtml = this.renderSectionButtons(viewModel);
 
     this.rootElement.innerHTML = `
       ${this.renderTopbar(viewModel)}
@@ -94,6 +102,8 @@ export class AssessmentRenderer {
     return `
       <div class="toolbar">
         <span class="toolbar-label">${viewModel.answeredCount} of ${viewModel.totalQuestions} answered</span>
+        <button class="tbtn" data-act="home">Home</button>
+        <button class="tbtn" data-act="toggleReview">${viewModel.isReviewMode ? "All Questions" : "Review Unanswered"}</button>
         <button class="tbtn focus-btn" data-act="focusToggle">Focused View</button>
         <button class="tbtn share-btn" data-act="sharexl">Share Export</button>
         <button class="dlbtn-big" data-act="dlxl">

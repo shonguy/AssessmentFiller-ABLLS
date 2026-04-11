@@ -1,14 +1,26 @@
 import { HtmlEscaper } from "../utils.js";
+import { AssessmentHomeRenderer } from "./AssessmentHomeRenderer.js";
+import { AssessmentCheckpointRenderer } from "./AssessmentCheckpointRenderer.js";
 import { FocusedAssessmentRenderer } from "./FocusedAssessmentRenderer.js";
 
 export class AssessmentBodyRenderer {
   constructor() {
+    this.homeRenderer = new AssessmentHomeRenderer();
+    this.checkpointRenderer = new AssessmentCheckpointRenderer();
     this.focusedAssessmentRenderer = new FocusedAssessmentRenderer();
   }
 
   render(viewModel) {
     if (viewModel.isFocusedView) {
       return this.focusedAssessmentRenderer.render(viewModel);
+    }
+
+    if (viewModel.mode === "home") {
+      return this.homeRenderer.render(viewModel);
+    }
+
+    if (viewModel.mode === "checkpoint") {
+      return this.checkpointRenderer.render(viewModel);
     }
 
     if (viewModel.mode === "summary") {

@@ -4,6 +4,7 @@ export class AppConstants {
   static storageKeys = {
     scores: "ablls_sc2",
     darkTheme: "ablls_dark",
+    workflow: "ablls_workflow_v1",
   };
 
   static paths = {
