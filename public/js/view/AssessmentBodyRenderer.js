@@ -116,7 +116,6 @@ export class AssessmentBodyRenderer {
 
     return `
       <div class="tblk${isSelected ? " sel" : ""}" data-act="tier" data-id="${questionId}" data-tn="${tierNumber}" style="background:${background};border-color:${borderColor};box-shadow:${shadow}">
-        <div class="tnum" style="color:${isSelected ? accentColor : "var(--tx3)"}">${tierNumber}</div>
         <div class="ttxt">${HtmlEscaper.escape(tierText)}</div>
       </div>
     `;

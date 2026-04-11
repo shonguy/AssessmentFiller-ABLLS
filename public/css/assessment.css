@@ -75,10 +75,6 @@
   color: var(--tx2);
 }
 
-.tblk.sel .ttxt {
-  color: var(--tx);
-}
-
 .tnone {
   min-height: 104px;
   padding: 18px;
@@ -279,7 +275,7 @@
 
 @media (max-width: 720px) {
   .card {
-    padding: 20px;
+    padding: 18px;
   }
 
   .navr,
@@ -316,11 +312,12 @@
   }
 
   .qdesc {
-    font-size: 22px;
+    font-size: 18px;
+    line-height: 1.45;
   }
 
   .ttxt,
   .qlist-desc {
-    font-size: 17px;
+    font-size: 15px;
   }
 }

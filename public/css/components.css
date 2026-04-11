@@ -224,12 +224,23 @@
 }
 
 @media (max-width: 720px) {
-  .snav,
+  .snav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+    gap: 8px;
+  }
+
   .mtog {
     flex-direction: column;
   }
 
-  .sbtn,
+  .sbtn {
+    width: 100%;
+    min-width: 0;
+    text-align: center;
+    padding: 10px 8px;
+  }
+
   .mbtn {
     width: 100%;
   }

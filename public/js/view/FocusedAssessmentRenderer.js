@@ -23,23 +23,18 @@ export class FocusedAssessmentRenderer {
     return `
       <div class="focused-shell">
         <div class="focused-meta">
+          <button class="focused-meta-button" data-act="nav" data-val="-1" ${viewModel.currentIndex === 0 ? "disabled" : ""}>Back</button>
           <span class="focused-progress">${viewModel.currentIndex + 1} / ${viewModel.filteredQuestions.length}</span>
-          <span class="focused-section">${HtmlEscaper.escape(question.sn)}</span>
+          <button class="focused-meta-button" data-act="focusToggle">Exit</button>
         </div>
         <div class="focused-card">
-          <span class="qid focused-qid" style="color:${viewModel.accentColor};background:${viewModel.accentColor}22">${HtmlEscaper.escape(question.id)}</span>
+          <div class="focused-section">${HtmlEscaper.escape(question.sn)}</div>
           <h2 class="focused-question">${HtmlEscaper.escape(question.d)}</h2>
           <div class="focused-options">
             ${tierBlocks}
             <button class="focused-none${hasScore && score === 0 ? " sel" : ""}" data-act="tier" data-id="${question.id}" data-tn="-1">
-              <span class="focused-none-symbol">Ø</span>
-              <span class="focused-none-label">None yet</span>
+              <span class="focused-none-label">None</span>
             </button>
-          </div>
-          <div class="focused-footer">
-            <button class="nbtn prev focused-nav" data-act="nav" data-val="-1" ${viewModel.currentIndex === 0 ? "disabled" : ""}>Back</button>
-            <button class="nbtn focused-exit" data-act="focusToggle">Exit Focused View</button>
-            <button class="nbtn next focused-nav" data-act="nav" data-val="1" style="background:${viewModel.accentColor}" ${viewModel.currentIndex >= viewModel.filteredQuestions.length - 1 ? "disabled" : ""}>Next</button>
           </div>
         </div>
       </div>
@@ -54,7 +49,6 @@ export class FocusedAssessmentRenderer {
 
     return `
       <button class="focused-option${isSelected ? " sel" : ""}" data-act="tier" data-id="${questionId}" data-tn="${tierNumber}" style="background:${background};border-color:${borderColor}">
-        <span class="focused-option-number" style="color:${isSelected ? accentColor : "var(--tx3)"}">${tierNumber}</span>
         <span class="focused-option-text">${HtmlEscaper.escape(tierText)}</span>
       </button>
     `;
