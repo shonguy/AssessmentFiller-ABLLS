@@ -1,0 +1,69 @@
+#app {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 20px 16px 100px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--s2);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.topbar h1 {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.counter {
+  font-family: monospace;
+  font-size: 13px;
+  color: var(--tx2);
+  background: var(--s1);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.pbar {
+  height: 4px;
+  background: var(--s2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.pfill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--s1);
+  border-radius: 10px;
+  border: 1px solid var(--s2);
+}
+
+.toolbar-label {
+  font-size: 12px;
+  color: var(--tx3);
+  margin-right: auto;
+}
