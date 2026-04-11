@@ -7,7 +7,7 @@ export class AppConstants {
   };
 
   static paths = {
-    questions: "./public/data/questions.json",
-    gridMap: "./public/data/grid-map.json",
+    questions: "/public/data/questions.json",
+    gridMap: "/public/data/grid-map.json",
   };
 }
