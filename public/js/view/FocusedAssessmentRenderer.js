@@ -23,7 +23,6 @@ export class FocusedAssessmentRenderer {
     return `
       <div class="focused-shell">
         <div class="focused-meta">
-          <button class="focused-meta-button" data-act="nav" data-val="-1" ${viewModel.currentIndex === 0 ? "disabled" : ""}>Back</button>
           <span class="focused-progress">${viewModel.currentIndex + 1} / ${viewModel.filteredQuestions.length}</span>
           <button class="focused-meta-button" data-act="focusToggle">Exit</button>
         </div>
@@ -36,6 +35,10 @@ export class FocusedAssessmentRenderer {
               <span class="focused-none-label">None</span>
             </button>
           </div>
+        </div>
+        <div class="focused-bottom-nav">
+          <button class="nbtn prev focused-nav" data-act="nav" data-val="-1" ${viewModel.currentIndex === 0 ? "disabled" : ""}>Back</button>
+          <button class="nbtn next focused-nav" data-act="nav" data-val="1" style="background:${viewModel.accentColor}" ${viewModel.currentIndex >= viewModel.filteredQuestions.length - 1 ? "disabled" : ""}>Next</button>
         </div>
       </div>
     `;

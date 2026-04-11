@@ -6,6 +6,10 @@ export class AssessmentExportManager {
     this.getState = getState;
   }
 
+  static excelFilename = "ablls-r-scored.xlsx";
+
+  static excelMimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
   downloadJson() {
     const state = this.getState();
     const payload = {
@@ -27,6 +31,58 @@ export class AssessmentExportManager {
       return;
     }
 
+    const excelBlob = this.buildExcelBlob();
+    FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
+  }
+
+  async shareExcel() {
+    if (!window.XLSX) {
+      alert("Excel export is not available right now.");
+      return;
+    }
+
+    const excelBlob = this.buildExcelBlob();
+    const excelFile = new File(
+      [excelBlob],
+      AssessmentExportManager.excelFilename,
+      { type: AssessmentExportManager.excelMimeType }
+    );
+
+    if (!this.canShareFiles([excelFile])) {
+      FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
+      alert("Sharing is not supported here, so the export was downloaded instead.");
+      return;
+    }
+
+    try {
+      await navigator.share({
+        files: [excelFile],
+        title: AssessmentExportManager.excelFilename,
+      });
+    } catch (error) {
+      if (error?.name === "AbortError") {
+        return;
+      }
+
+      FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
+      alert("Sharing failed, so the export was downloaded instead.");
+    }
+  }
+
+  buildExcelBlob() {
+    const workbook = this.buildExcelWorkbook();
+    const workbookArray = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    return new Blob(
+      [workbookArray],
+      { type: AssessmentExportManager.excelMimeType }
+    );
+  }
+
+  buildExcelWorkbook() {
     const state = this.getState();
     const rows = [["Item ID", "Section", "Section Name", "Description", "Score", "Max Tiers", "Status"]];
 
@@ -60,6 +116,18 @@ export class AssessmentExportManager {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "ABLLS-R Scores");
     XLSX.utils.book_append_sheet(workbook, summaryWorksheet, "Summary");
-    XLSX.writeFile(workbook, "ablls-r-scored.xlsx");
+    return workbook;
+  }
+
+  canShareFiles(files) {
+    if (typeof navigator === "undefined" || typeof navigator.share !== "function") {
+      return false;
+    }
+
+    if (typeof navigator.canShare !== "function") {
+      return false;
+    }
+
+    return navigator.canShare({ files });
   }
 }

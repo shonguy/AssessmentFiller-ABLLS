@@ -103,6 +103,11 @@ export class AssessmentCoordinator {
       return;
     }
 
+    if (action === "sharexl") {
+      this.exportManager.shareExcel();
+      return;
+    }
+
     if (action === "dljson") {
       this.exportManager.downloadJson();
     }

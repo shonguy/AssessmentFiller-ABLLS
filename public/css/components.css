@@ -223,6 +223,11 @@
   color: var(--tx);
 }
 
+.share-btn {
+  background: var(--s2);
+  color: var(--tx);
+}
+
 @media (max-width: 720px) {
   .snav {
     display: grid;
