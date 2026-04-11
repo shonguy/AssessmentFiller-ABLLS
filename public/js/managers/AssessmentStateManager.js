@@ -9,6 +9,7 @@ export class AssessmentStateManager {
       mode: "assess",
       activeSection: null,
       accentColor: AppConstants.accentColors[0],
+      isFocusedView: false,
       isColorPickerOpen: false,
       isDarkTheme: true,
       scores: {},
@@ -57,6 +58,14 @@ export class AssessmentStateManager {
 
   setMode(mode) {
     this.state.mode = mode;
+    if (mode !== "assess") {
+      this.state.isFocusedView = false;
+    }
+  }
+
+  toggleFocusedView() {
+    this.state.isFocusedView = !this.state.isFocusedView;
+    this.state.mode = "assess";
   }
 
   jumpToQuestion(questionId, section) {

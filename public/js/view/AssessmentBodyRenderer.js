@@ -1,7 +1,16 @@
 import { HtmlEscaper } from "../utils.js";
+import { FocusedAssessmentRenderer } from "./FocusedAssessmentRenderer.js";
 
 export class AssessmentBodyRenderer {
+  constructor() {
+    this.focusedAssessmentRenderer = new FocusedAssessmentRenderer();
+  }
+
   render(viewModel) {
+    if (viewModel.isFocusedView) {
+      return this.focusedAssessmentRenderer.render(viewModel);
+    }
+
     if (viewModel.mode === "summary") {
       return this.renderSummary(viewModel);
     }

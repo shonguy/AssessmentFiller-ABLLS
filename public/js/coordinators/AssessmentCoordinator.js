@@ -59,6 +59,12 @@ export class AssessmentCoordinator {
       return;
     }
 
+    if (action === "focusToggle") {
+      this.stateManager.toggleFocusedView();
+      this.render();
+      return;
+    }
+
     if (action === "secsm") {
       this.stateManager.setActiveSection(value);
       this.stateManager.setMode("assess");

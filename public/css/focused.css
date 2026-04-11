@@ -1,0 +1,144 @@
+.app-focused {
+  max-width: none !important;
+  padding: 0 !important;
+}
+
+.focused-shell {
+  min-height: 100vh;
+  padding: 20px 16px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: center;
+}
+
+.focused-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--tx2);
+  font-size: 14px;
+}
+
+.focused-progress,
+.focused-section {
+  background: var(--s1);
+  border: 1px solid var(--s3);
+  border-radius: 999px;
+  padding: 8px 12px;
+}
+
+.focused-card {
+  background: var(--s1);
+  border: 1px solid var(--s3);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+}
+
+.focused-qid {
+  margin-bottom: 18px;
+}
+
+.focused-question {
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+
+.focused-options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.focused-option,
+.focused-none {
+  width: 100%;
+  border-radius: 20px;
+  border: 2px solid var(--s3);
+  background: var(--s2);
+  color: var(--tx);
+  padding: 18px 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.focused-option:hover,
+.focused-none:hover {
+  transform: translateY(-1px);
+  border-color: var(--tx2);
+}
+
+.focused-option.sel,
+.focused-none.sel {
+  background: var(--s3);
+}
+
+.focused-option-number,
+.focused-none-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.focused-option-text,
+.focused-none-label {
+  display: block;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.focused-footer {
+  display: flex;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.focused-nav,
+.focused-exit {
+  flex: 1;
+  min-height: 52px;
+}
+
+.focused-exit {
+  background: transparent;
+  border: 1px solid var(--s3);
+  color: var(--tx2);
+}
+
+@media (max-width: 720px) {
+  .focused-shell {
+    padding: 12px 10px 24px;
+    justify-content: flex-start;
+  }
+
+  .focused-meta,
+  .focused-footer {
+    flex-direction: column;
+  }
+
+  .focused-card {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .focused-question {
+    font-size: 1.9rem;
+  }
+
+  .focused-option-text,
+  .focused-none-label {
+    font-size: 18px;
+  }
+}

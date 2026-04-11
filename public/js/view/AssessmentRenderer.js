@@ -9,13 +9,20 @@ export class AssessmentRenderer {
   }
 
   render(viewModel) {
+    this.rootElement.classList.toggle("app-focused", viewModel.isFocusedView);
+
+    if (viewModel.isFocusedView) {
+      this.rootElement.innerHTML = this.bodyRenderer.render(viewModel);
+      return;
+    }
+
     const sectionsHtml = this.renderSectionButtons(viewModel);
     const bodyHtml = this.bodyRenderer.render(viewModel);
 
     this.rootElement.innerHTML = `
       ${this.renderTopbar(viewModel)}
       <div class="pbar">
-        <div class="pfill" style="width:${viewModel.progressPercent}%;background:linear-gradient(90deg,${viewModel.accentColor},var(--green))"></div>
+        <div class="pfill" style="width:${viewModel.progressPercent}%;background:linear-gradient(90deg,${viewModel.accentColor},var(--tx2))"></div>
       </div>
       <div class="snav">${sectionsHtml}</div>
       ${this.renderToolbar(viewModel)}
@@ -87,6 +94,7 @@ export class AssessmentRenderer {
     return `
       <div class="toolbar">
         <span class="toolbar-label">${viewModel.answeredCount} of ${viewModel.totalQuestions} answered</span>
+        <button class="tbtn focus-btn" data-act="focusToggle">Focused View</button>
         <button class="dlbtn-big" data-act="dlxl">
           <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
           Download Excel
