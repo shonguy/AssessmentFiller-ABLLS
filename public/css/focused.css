@@ -12,22 +12,44 @@
   justify-content: flex-start;
 }
 
-.focused-meta {
-  display: grid;
-  grid-template-columns: 1fr auto;
+.focused-topbar {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
   align-items: center;
-  gap: 10px;
-  color: var(--tx2);
-  font-size: 13px;
+  min-height: 40px;
 }
 
-.focused-progress,
-.focused-section,
-.focused-meta-button {
+.focused-progress {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(240px, calc(100% - 64px));
+  height: 18px;
   background: var(--s1);
   border: 1px solid var(--s3);
   border-radius: 999px;
-  padding: 7px 10px;
+  overflow: hidden;
+}
+
+.focused-progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--tx2);
+  border-radius: 999px;
+}
+
+.focused-progress-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tx);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 .focused-card {
@@ -41,8 +63,7 @@
 .focused-bottom-nav {
   position: sticky;
   bottom: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: 10px;
   margin-top: auto;
   padding-top: 12px;
@@ -50,26 +71,27 @@
   background: linear-gradient(to bottom, rgba(20, 21, 23, 0), var(--bg) 28%);
 }
 
-.focused-meta-button {
+.focused-close-button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--s3);
+  border-radius: 999px;
+  background: var(--s1);
   color: var(--tx2);
-  font-size: 13px;
+  font-size: 24px;
+  line-height: 1;
   cursor: pointer;
   text-align: center;
-}
-
-.focused-meta-button:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.focused-progress {
-  justify-self: start;
 }
 
 .focused-section {
   display: inline-flex;
   margin-bottom: 12px;
   color: var(--tx3);
+  background: var(--s1);
+  border: 1px solid var(--s3);
+  border-radius: 999px;
+  padding: 7px 10px;
 }
 
 .focused-question {
@@ -119,6 +141,25 @@
 
 .focused-nav {
   min-height: 50px;
+  border: 1px solid var(--s3);
+  border-radius: 16px;
+  background: var(--s2);
+  color: var(--tx);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.focused-bottom-nav .focused-nav:first-child {
+  flex: 0 0 24%;
+  min-width: 72px;
+}
+
+.focused-bottom-nav .focused-nav:last-child {
+  flex: 1 1 76%;
+}
+
+.focused-nav:hover {
+  filter: brightness(1.05);
 }
 
 @media (max-width: 720px) {
@@ -127,9 +168,8 @@
     justify-content: flex-start;
   }
 
-  .focused-meta {
-    grid-template-columns: 1fr auto;
-    gap: 8px;
+  .focused-topbar {
+    min-height: 36px;
   }
 
   .focused-card {
@@ -161,10 +201,23 @@
     padding-top: 10px;
   }
 
-  .focused-section,
-  .focused-progress,
-  .focused-meta-button {
+  .focused-section {
     font-size: 12px;
     padding: 6px 8px;
+  }
+
+  .focused-progress {
+    width: min(200px, calc(100% - 52px));
+    height: 16px;
+  }
+
+  .focused-progress-text {
+    font-size: 9px;
+  }
+
+  .focused-close-button {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
   }
 }

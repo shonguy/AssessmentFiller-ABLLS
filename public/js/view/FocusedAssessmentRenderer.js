@@ -16,15 +16,22 @@ export class FocusedAssessmentRenderer {
     const score = viewModel.scores[question.id];
     const hasScore = score !== undefined;
     const scoreValue = hasScore ? score : 0;
+    const progressPercent = Math.max(
+      1,
+      Math.round(((viewModel.currentIndex + 1) / viewModel.filteredQuestions.length) * 100)
+    );
     const tierBlocks = question.t
       .map((tier, index) => this.renderTierBlock(question.id, tier, index + 1, scoreValue, hasScore, viewModel.accentColor))
       .join("");
 
     return `
       <div class="focused-shell">
-        <div class="focused-meta">
-          <span class="focused-progress">${viewModel.currentIndex + 1} / ${viewModel.filteredQuestions.length}</span>
-          <button class="focused-meta-button" data-act="focusToggle">Exit</button>
+        <div class="focused-topbar">
+          <div class="focused-progress" aria-label="${progressPercent}% complete">
+            <div class="focused-progress-fill" style="width:${progressPercent}%"></div>
+            <span class="focused-progress-text">${progressPercent}%</span>
+          </div>
+          <button class="focused-close-button" data-act="focusToggle" aria-label="Exit focused view">×</button>
         </div>
         <div class="focused-card">
           <div class="focused-section">${HtmlEscaper.escape(question.sn)}</div>
@@ -37,8 +44,8 @@ export class FocusedAssessmentRenderer {
           </div>
         </div>
         <div class="focused-bottom-nav">
-          <button class="nbtn prev focused-nav" data-act="nav" data-val="-1" ${viewModel.currentIndex === 0 ? "disabled" : ""}>Back</button>
-          <button class="nbtn next focused-nav" data-act="nav" data-val="1" style="background:${viewModel.accentColor}" ${viewModel.currentIndex >= viewModel.filteredQuestions.length - 1 ? "disabled" : ""}>Next</button>
+          <button class="nbtn focused-nav" data-act="nav" data-val="-1" aria-label="Previous question" ${viewModel.currentIndex === 0 ? "disabled" : ""}>←</button>
+          <button class="nbtn focused-nav" data-act="nav" data-val="1" aria-label="Next question" ${viewModel.currentIndex >= viewModel.filteredQuestions.length - 1 ? "disabled" : ""}>→</button>
         </div>
       </div>
     `;
