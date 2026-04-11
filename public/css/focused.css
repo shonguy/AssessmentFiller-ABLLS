@@ -61,14 +61,10 @@
 }
 
 .focused-bottom-nav {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  gap: 10px;
-  margin-top: auto;
-  padding-top: 12px;
-  padding-bottom: calc(4px + env(safe-area-inset-bottom));
-  background: linear-gradient(to bottom, rgba(20, 21, 23, 0), var(--bg) 28%);
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
 }
 
 .focused-close-button {
@@ -140,22 +136,28 @@
 }
 
 .focused-nav {
-  min-height: 50px;
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 58px;
+  height: 58px;
+  min-height: 58px;
   border: 1px solid var(--s3);
-  border-radius: 16px;
+  border-radius: 999px;
   background: var(--s2);
   color: var(--tx);
   font-size: 22px;
   font-weight: 600;
+  pointer-events: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
 }
 
 .focused-bottom-nav .focused-nav:first-child {
-  flex: 0 0 24%;
-  min-width: 72px;
+  left: -10px;
 }
 
 .focused-bottom-nav .focused-nav:last-child {
-  flex: 1 1 76%;
+  right: -10px;
 }
 
 .focused-nav:hover {
@@ -197,8 +199,7 @@
   }
 
   .focused-bottom-nav {
-    gap: 8px;
-    padding-top: 10px;
+    z-index: 30;
   }
 
   .focused-section {
@@ -219,5 +220,20 @@
     width: 36px;
     height: 36px;
     font-size: 22px;
+  }
+
+  .focused-nav {
+    width: 50px;
+    height: 50px;
+    min-height: 50px;
+    font-size: 20px;
+  }
+
+  .focused-bottom-nav .focused-nav:first-child {
+    left: -8px;
+  }
+
+  .focused-bottom-nav .focused-nav:last-child {
+    right: -8px;
   }
 }
