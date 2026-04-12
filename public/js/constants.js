@@ -10,6 +10,7 @@ export class AppConstants {
   static paths = {
     questions: "/public/data/questions.json",
     gridMap: "/public/data/grid-map.json",
+    jszip: "/public/vendor/jszip.min.js",
     workbookTemplate: "/public/templates/ablls-r-template.xlsx",
   };
 

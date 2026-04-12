@@ -6,6 +6,7 @@ export class AssessmentExportManager {
   constructor(dataManager, getState) {
     this.dataManager = dataManager;
     this.getState = getState;
+    this.jszipLoadPromise = null;
     this.templateManager = new AssessmentWorkbookTemplateManager(dataManager);
   }
 
@@ -29,12 +30,8 @@ export class AssessmentExportManager {
   }
 
   async downloadExcel() {
-    if (!window.JSZip) {
-      alert("Excel export is not available right now.");
-      return;
-    }
-
     try {
+      await this.ensureExcelExportSupport();
       const excelBlob = await this.buildExcelBlob();
       FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
     } catch (error) {
@@ -43,14 +40,10 @@ export class AssessmentExportManager {
   }
 
   async shareExcel() {
-    if (!window.JSZip) {
-      alert("Excel export is not available right now.");
-      return;
-    }
-
     let excelBlob;
 
     try {
+      await this.ensureExcelExportSupport();
       excelBlob = await this.buildExcelBlob();
       const excelFile = new File(
         [excelBlob],
@@ -101,5 +94,44 @@ export class AssessmentExportManager {
     }
 
     return navigator.canShare({ files });
+  }
+
+  async ensureExcelExportSupport() {
+    if (window.JSZip) {
+      return;
+    }
+
+    this.jszipLoadPromise = this.jszipLoadPromise ?? this.loadScript(AppConstants.paths.jszip);
+    await this.jszipLoadPromise;
+
+    if (!window.JSZip) {
+      throw new Error("Excel export is not available right now.");
+    }
+  }
+
+  loadScript(sourcePath) {
+    return new Promise((resolve, reject) => {
+      const absoluteSource = new URL(sourcePath, window.location.origin).href;
+      const existingScript = Array.from(document.scripts)
+        .find((script) => script.src === absoluteSource);
+
+      if (existingScript) {
+        if (window.JSZip) {
+          resolve();
+          return;
+        }
+      }
+
+      const script = document.createElement("script");
+      script.src = existingScript ? `${sourcePath}?retry=${Date.now()}` : sourcePath;
+      script.async = true;
+      script.addEventListener("load", () => resolve(), { once: true });
+      script.addEventListener(
+        "error",
+        () => reject(new Error("Excel export is not available right now.")),
+        { once: true }
+      );
+      document.head.appendChild(script);
+    });
   }
 }
