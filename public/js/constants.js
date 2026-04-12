@@ -10,5 +10,15 @@ export class AppConstants {
   static paths = {
     questions: "/public/data/questions.json",
     gridMap: "/public/data/grid-map.json",
+    workbookTemplate: "/public/templates/ablls-r-template.xlsx",
+  };
+
+  static workbookTemplate = {
+    defaultAssessmentCode: 1,
+    metadataSheetName: "AssessmentFiller Data",
+    runSlotCount: 6,
+    runSlotStartRow: 8,
+    runSlotRowStep: 3,
+    worksheetName: "ABLLs",
   };
 }

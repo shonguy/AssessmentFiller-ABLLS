@@ -1,12 +1,17 @@
+import { AppConstants } from "../constants.js";
 import { FileDownloadHelper } from "../utils.js";
+import { AssessmentExportMetadataSheetManager } from "./AssessmentExportMetadataSheetManager.js";
+import { AssessmentWorkbookTemplateManager } from "./AssessmentWorkbookTemplateManager.js";
 
 export class AssessmentExportManager {
   constructor(dataManager, getState) {
     this.dataManager = dataManager;
     this.getState = getState;
+    this.metadataSheetManager = new AssessmentExportMetadataSheetManager(dataManager);
+    this.templateManager = new AssessmentWorkbookTemplateManager(dataManager);
   }
 
-  static excelFilename = "ablls-r-scored.xlsx";
+  static excelFilename = "ablls-r-assessment.xlsx";
 
   static excelMimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
@@ -25,14 +30,18 @@ export class AssessmentExportManager {
     );
   }
 
-  downloadExcel() {
+  async downloadExcel() {
     if (!window.XLSX) {
       alert("Excel export is not available right now.");
       return;
     }
 
-    const excelBlob = this.buildExcelBlob();
-    FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
+    try {
+      const excelBlob = await this.buildExcelBlob();
+      FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
+    } catch (error) {
+      alert(error.message || "Excel export failed.");
+    }
   }
 
   async shareExcel() {
@@ -41,20 +50,22 @@ export class AssessmentExportManager {
       return;
     }
 
-    const excelBlob = this.buildExcelBlob();
-    const excelFile = new File(
-      [excelBlob],
-      AssessmentExportManager.excelFilename,
-      { type: AssessmentExportManager.excelMimeType }
-    );
-
-    if (!this.canShareFiles([excelFile])) {
-      FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
-      alert("Sharing is not supported here, so the export was downloaded instead.");
-      return;
-    }
+    let excelBlob;
 
     try {
+      excelBlob = await this.buildExcelBlob();
+      const excelFile = new File(
+        [excelBlob],
+        AssessmentExportManager.excelFilename,
+        { type: AssessmentExportManager.excelMimeType }
+      );
+
+      if (!this.canShareFiles([excelFile])) {
+        FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
+        alert("Sharing is not supported here, so the export was downloaded instead.");
+        return;
+      }
+
       await navigator.share({
         files: [excelFile],
         title: AssessmentExportManager.excelFilename,
@@ -64,13 +75,18 @@ export class AssessmentExportManager {
         return;
       }
 
-      FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
-      alert("Sharing failed, so the export was downloaded instead.");
+      if (excelBlob) {
+        FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
+        alert("Sharing failed, so the export was downloaded instead.");
+        return;
+      }
+
+      alert(error.message || "Excel export failed.");
     }
   }
 
-  buildExcelBlob() {
-    const workbook = this.buildExcelWorkbook();
+  async buildExcelBlob() {
+    const workbook = await this.buildExcelWorkbook();
     const workbookArray = XLSX.write(workbook, {
       bookType: "xlsx",
       type: "array",
@@ -82,40 +98,21 @@ export class AssessmentExportManager {
     );
   }
 
-  buildExcelWorkbook() {
+  async buildExcelWorkbook() {
     const state = this.getState();
-    const rows = [["Item ID", "Section", "Section Name", "Description", "Score", "Max Tiers", "Status"]];
-
-    this.dataManager.questions.forEach((question) => {
-      const answered = state.scores[question.id] !== undefined;
-      const score = answered ? state.scores[question.id] : "";
-      const status = !answered ? "" : score === 0 ? "None" : "Scored";
-      rows.push([question.id, question.s, question.sn, question.d, score, question.t.length, status]);
+    const assessmentCode = AppConstants.workbookTemplate.defaultAssessmentCode;
+    const assessmentDate = new Date();
+    const workbook = await this.templateManager.buildWorkbook(state.scores, {
+      assessmentCode,
+      assessmentDate,
     });
 
-    const worksheet = XLSX.utils.aoa_to_sheet(rows);
-    worksheet["!cols"] = [{ wch: 8 }, { wch: 5 }, { wch: 35 }, { wch: 80 }, { wch: 7 }, { wch: 10 }, { wch: 8 }];
-
-    const summaryRows = [["Section", "Name", "Answered", "Total", "Scored", "Points", "Max Points", "% of Max"]];
-    this.dataManager.buildSummary(state.scores).forEach((summary) => {
-      summaryRows.push([
-        summary.section,
-        summary.sectionName,
-        summary.answered,
-        summary.questions.length,
-        summary.scored,
-        summary.points,
-        summary.maxPoints,
-        `${summary.percentOfMax}%`,
-      ]);
-    });
-
-    const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryRows);
-    summaryWorksheet["!cols"] = [{ wch: 8 }, { wch: 35 }, { wch: 9 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 10 }, { wch: 10 }];
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "ABLLS-R Scores");
-    XLSX.utils.book_append_sheet(workbook, summaryWorksheet, "Summary");
+    this.metadataSheetManager.appendMetadataSheet(
+      workbook,
+      state.scores,
+      assessmentCode,
+      assessmentDate
+    );
     return workbook;
   }
 
