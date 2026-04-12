@@ -1,53 +1,29 @@
 import { AppConstants } from "../constants.js";
+import { AssessmentWorkbookArchiveManager } from "./AssessmentWorkbookArchiveManager.js";
 
 export class AssessmentWorkbookTemplateManager {
   constructor(dataManager) {
     this.dataManager = dataManager;
+    this.archiveManager = new AssessmentWorkbookArchiveManager();
   }
 
-  async buildWorkbook(scores, options = {}) {
-    const workbook = await this.loadTemplateWorkbook();
-    const worksheet = workbook.Sheets[AppConstants.workbookTemplate.worksheetName];
-
-    if (!worksheet) {
-      throw new Error("The ABLLS workbook template is missing its assessment sheet.");
-    }
-
+  async buildWorkbookBlob(scores, options = {}) {
+    const zip = await this.archiveManager.loadTemplateZip(AppConstants.paths.workbookTemplate);
     const assessmentCode = this.resolveAssessmentCode(options.assessmentCode);
     const assessmentDate = options.assessmentDate ?? new Date();
+    const worksheetPath = await this.archiveManager.resolveWorksheetPath(
+      zip,
+      AppConstants.workbookTemplate.worksheetName
+    );
+    const worksheetDocument = await this.archiveManager.loadXmlDocument(zip, worksheetPath);
+    const worksheetState = this.archiveManager.buildWorksheetState(worksheetDocument);
 
-    this.applyAssessmentMetadata(worksheet, assessmentCode, assessmentDate);
-    this.applyScores(worksheet, scores, assessmentCode);
-
-    return workbook;
-  }
-
-  async loadTemplateWorkbook() {
-    const response = await fetch(AppConstants.paths.workbookTemplate);
-
-    if (!response.ok) {
-      throw new Error("Unable to load the ABLLS workbook template.");
-    }
-
-    const workbook = XLSX.read(await response.arrayBuffer(), {
-      type: "array",
-      cellFormula: true,
-      cellNF: true,
-      cellStyles: true,
-      sheetStubs: true,
-    });
-
-    this.ensureWorkbookRecalculation(workbook);
-    return workbook;
-  }
-
-  ensureWorkbookRecalculation(workbook) {
-    workbook.Workbook = workbook.Workbook ?? {};
-    workbook.Workbook.CalcPr = {
-      ...(workbook.Workbook.CalcPr ?? {}),
-      fullCalcOnLoad: "1",
-      forceFullCalc: "1",
-    };
+    this.clearAssessmentMetadata(worksheetState);
+    this.clearScores(worksheetState);
+    this.applyAssessmentMetadata(worksheetState, assessmentCode, assessmentDate);
+    this.applyScores(worksheetState, scores, assessmentCode);
+    zip.file(worksheetPath, this.archiveManager.serializeXmlDocument(worksheetDocument));
+    return zip.generateAsync({ type: "blob" });
   }
 
   resolveAssessmentCode(assessmentCode) {
@@ -59,14 +35,6 @@ export class AssessmentWorkbookTemplateManager {
     }
 
     return normalizedCode;
-  }
-
-  applyAssessmentMetadata(worksheet, assessmentCode, assessmentDate) {
-    const slotRow = this.getRunSlotRow(assessmentCode);
-    const excelDateValue = this.buildExcelDateValue(assessmentDate);
-
-    this.writeNumericCell(worksheet, `I${slotRow}`, excelDateValue);
-    this.writeFormulaCacheCell(worksheet, `AA${slotRow - 1}`, excelDateValue);
   }
 
   getRunSlotRow(assessmentCode) {
@@ -90,7 +58,13 @@ export class AssessmentWorkbookTemplateManager {
     ) / 86400000;
   }
 
-  applyScores(worksheet, scores, assessmentCode) {
+  clearAssessmentMetadata(worksheetState) {
+    for (let code = 1; code <= AppConstants.workbookTemplate.runSlotCount; code += 1) {
+      this.archiveManager.clearCellValue(worksheetState, `I${this.getRunSlotRow(code)}`);
+    }
+  }
+
+  clearScores(worksheetState) {
     this.dataManager.questions.forEach((question) => {
       const scoreMap = this.dataManager.cellMap[question.id];
 
@@ -98,8 +72,29 @@ export class AssessmentWorkbookTemplateManager {
         return;
       }
 
-      const normalizedScore = this.normalizeScore(scores[question.id], question.t.length);
-      this.applyQuestionScore(worksheet, scoreMap, normalizedScore, assessmentCode);
+      scoreMap.scoreCols.forEach((columnNumber) => {
+        this.archiveManager.clearCellValue(
+          worksheetState,
+          XLSX.utils.encode_cell({ c: columnNumber - 1, r: scoreMap.row - 1 })
+        );
+      });
+    });
+  }
+
+  applyScores(worksheetState, scores, assessmentCode) {
+    this.dataManager.questions.forEach((question) => {
+      const scoreMap = this.dataManager.cellMap[question.id];
+
+      if (!scoreMap) {
+        return;
+      }
+
+      this.applyQuestionScore(
+        worksheetState,
+        scoreMap,
+        this.normalizeScore(scores[question.id], question.t.length),
+        assessmentCode
+      );
     });
   }
 
@@ -111,49 +106,21 @@ export class AssessmentWorkbookTemplateManager {
     return Math.min(score, maxScore);
   }
 
-  applyQuestionScore(worksheet, scoreMap, score, assessmentCode) {
+  applyQuestionScore(worksheetState, scoreMap, score, assessmentCode) {
     scoreMap.scoreCols.forEach((columnNumber, index) => {
-      const cellAddress = XLSX.utils.encode_cell({
-        c: columnNumber - 1,
-        r: scoreMap.row - 1,
-      });
+      const cellAddress = XLSX.utils.encode_cell({ c: columnNumber - 1, r: scoreMap.row - 1 });
 
       if (index < score) {
-        this.writeNumericCell(worksheet, cellAddress, assessmentCode);
-        return;
+        this.archiveManager.writeNumericCell(worksheetState, cellAddress, assessmentCode);
       }
-
-      this.clearCellValue(worksheet, cellAddress);
     });
   }
 
-  writeNumericCell(worksheet, cellAddress, value) {
-    const cell = worksheet[cellAddress] ?? {};
-    cell.t = "n";
-    cell.v = value;
-    delete cell.w;
-    worksheet[cellAddress] = cell;
-  }
-
-  writeFormulaCacheCell(worksheet, cellAddress, value) {
-    const cell = worksheet[cellAddress] ?? {};
-    cell.v = value;
-    delete cell.t;
-    delete cell.w;
-    worksheet[cellAddress] = cell;
-  }
-
-  clearCellValue(worksheet, cellAddress) {
-    const cell = worksheet[cellAddress];
-
-    if (!cell) {
-      return;
-    }
-
-    delete cell.v;
-    delete cell.w;
-    if (!cell.f) {
-      cell.t = "z";
-    }
+  applyAssessmentMetadata(worksheetState, assessmentCode, assessmentDate) {
+    this.archiveManager.writeNumericCell(
+      worksheetState,
+      `I${this.getRunSlotRow(assessmentCode)}`,
+      this.buildExcelDateValue(assessmentDate)
+    );
   }
 }

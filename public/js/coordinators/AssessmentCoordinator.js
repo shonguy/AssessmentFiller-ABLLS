@@ -107,13 +107,13 @@ export class AssessmentCoordinator {
     if (/^[1-9]$/.test(event.key)) {
       const tierNumber = Number.parseInt(event.key, 10);
       if (tierNumber <= currentQuestion.t.length) {
-        this.handleTierSelection(currentQuestion.id, tierNumber);
+        this.actionHandler.handleTierSelection(currentQuestion.id, tierNumber);
       }
       return;
     }
 
     if (event.key === "0") {
-      this.handleTierSelection(currentQuestion.id, -1);
+      this.actionHandler.handleTierSelection(currentQuestion.id, -1);
       return;
     }
 

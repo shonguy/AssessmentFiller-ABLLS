@@ -1,13 +1,11 @@
 import { AppConstants } from "../constants.js";
 import { FileDownloadHelper } from "../utils.js";
-import { AssessmentExportMetadataSheetManager } from "./AssessmentExportMetadataSheetManager.js";
 import { AssessmentWorkbookTemplateManager } from "./AssessmentWorkbookTemplateManager.js";
 
 export class AssessmentExportManager {
   constructor(dataManager, getState) {
     this.dataManager = dataManager;
     this.getState = getState;
-    this.metadataSheetManager = new AssessmentExportMetadataSheetManager(dataManager);
     this.templateManager = new AssessmentWorkbookTemplateManager(dataManager);
   }
 
@@ -31,7 +29,7 @@ export class AssessmentExportManager {
   }
 
   async downloadExcel() {
-    if (!window.XLSX) {
+    if (!window.JSZip) {
       alert("Excel export is not available right now.");
       return;
     }
@@ -45,7 +43,7 @@ export class AssessmentExportManager {
   }
 
   async shareExcel() {
-    if (!window.XLSX) {
+    if (!window.JSZip) {
       alert("Excel export is not available right now.");
       return;
     }
@@ -86,34 +84,11 @@ export class AssessmentExportManager {
   }
 
   async buildExcelBlob() {
-    const workbook = await this.buildExcelWorkbook();
-    const workbookArray = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-
-    return new Blob(
-      [workbookArray],
-      { type: AssessmentExportManager.excelMimeType }
-    );
-  }
-
-  async buildExcelWorkbook() {
     const state = this.getState();
-    const assessmentCode = AppConstants.workbookTemplate.defaultAssessmentCode;
-    const assessmentDate = new Date();
-    const workbook = await this.templateManager.buildWorkbook(state.scores, {
-      assessmentCode,
-      assessmentDate,
+    return this.templateManager.buildWorkbookBlob(state.scores, {
+      assessmentCode: AppConstants.workbookTemplate.defaultAssessmentCode,
+      assessmentDate: new Date(),
     });
-
-    this.metadataSheetManager.appendMetadataSheet(
-      workbook,
-      state.scores,
-      assessmentCode,
-      assessmentDate
-    );
-    return workbook;
   }
 
   canShareFiles(files) {
