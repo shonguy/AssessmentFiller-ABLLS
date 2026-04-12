@@ -35,6 +35,16 @@ export class AssessmentImportManager {
 
   readWorkbookScores(workbook, currentScores) {
     const metadataWorksheet = workbook.Sheets[AppConstants.workbookTemplate.metadataSheetName];
+    const templateWorksheet = workbook.Sheets[AppConstants.workbookTemplate.worksheetName];
+
+    if (templateWorksheet) {
+      return this.readTemplateBackedWorkbook(
+        templateWorksheet,
+        metadataWorksheet,
+        currentScores
+      );
+    }
+
     if (metadataWorksheet) {
       return this.readMetadataWorksheet(metadataWorksheet, currentScores);
     }
@@ -44,12 +54,26 @@ export class AssessmentImportManager {
       return this.readMetadataWorksheet(fallbackWorksheet, currentScores);
     }
 
-    const templateWorksheet = workbook.Sheets[AppConstants.workbookTemplate.worksheetName];
-    if (templateWorksheet) {
-      return this.readTemplateWorksheet(templateWorksheet, currentScores);
-    }
-
     throw new Error("Could not find AssessmentFiller data or the ABLLS template sheet.");
+  }
+
+  readTemplateBackedWorkbook(templateWorksheet, metadataWorksheet, currentScores) {
+    const templateScores = this.readTemplateWorksheet(templateWorksheet, {});
+    const metadataScores = metadataWorksheet
+      ? this.readMetadataWorksheet(metadataWorksheet, {}).importedScores
+      : {};
+    const mergedScores = this.mergeTemplateAndMetadataScores(
+      templateScores.importedScores,
+      metadataScores
+    );
+
+    return {
+      importedCount: Object.keys(mergedScores).length,
+      importedScores: {
+        ...currentScores,
+        ...mergedScores,
+      },
+    };
   }
 
   readMetadataWorksheet(worksheet, currentScores) {
@@ -127,6 +151,20 @@ export class AssessmentImportManager {
     return { importedCount, importedScores };
   }
 
+  mergeTemplateAndMetadataScores(templateScores, metadataScores) {
+    const mergedScores = { ...templateScores };
+
+    Object.entries(metadataScores).forEach(([questionId, scoreValue]) => {
+      if (scoreValue !== 0 || mergedScores[questionId] > 0) {
+        return;
+      }
+
+      mergedScores[questionId] = 0;
+    });
+
+    return mergedScores;
+  }
+
   findWorksheetWithItemIdHeader(workbook) {
     return workbook.SheetNames
       .map((sheetName) => workbook.Sheets[sheetName])
@@ -155,6 +193,7 @@ export class AssessmentImportManager {
   }
 
   isFilledTemplateCell(cell) {
-    return Number.isFinite(cell?.v) && cell.v > 0;
+    const normalizedValue = Number(cell?.v);
+    return Number.isFinite(normalizedValue) && normalizedValue > 0;
   }
 }
