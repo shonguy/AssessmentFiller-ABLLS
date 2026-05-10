@@ -21,6 +21,38 @@
   letter-spacing: -0.3px;
 }
 
+.assessment-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.assessment-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tx3);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.assessment-picker span {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.assessment-picker select {
+  min-width: 120px;
+  padding: 8px 32px 8px 12px;
+  border: 1px solid var(--s3);
+  border-radius: 12px;
+  background: var(--s1);
+  color: var(--tx);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .topbar-right {
   display: flex;
   align-items: center;
@@ -76,6 +108,21 @@
 
   .topbar {
     align-items: stretch;
+  }
+
+  .assessment-title {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .assessment-picker {
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .assessment-picker select {
+    max-width: 150px;
+    min-width: 0;
   }
 
   .topbar-right {

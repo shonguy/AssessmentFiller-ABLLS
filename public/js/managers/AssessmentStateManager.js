@@ -10,6 +10,7 @@ export class AssessmentStateManager {
       currentIndex: 0,
       mode: "home",
       activeSection: null,
+      selectedAssessmentId: AppConstants.assessments[0].id,
       accentColor: AppConstants.accentColors[0],
       checkpointSection: null,
       isFocusedView: false,
@@ -64,6 +65,15 @@ export class AssessmentStateManager {
 
   setAccentColor(color) {
     this.state.accentColor = color;
+  }
+
+  setSelectedAssessment(assessmentId) {
+    const assessment = AppConstants.assessments.find((entry) => entry.id === assessmentId);
+    if (!assessment) {
+      return;
+    }
+
+    this.state.selectedAssessmentId = assessment.id;
   }
 
   setActiveSection(section) {
@@ -181,6 +191,8 @@ export class AssessmentStateManager {
 
     return {
       ...this.state,
+      assessments: AppConstants.assessments,
+      selectedAssessment: this.getSelectedAssessment(),
       checkpoint: this.workflowManager.buildCheckpoint(this.state.checkpointSection, this.state.scores),
       filteredQuestions,
       answeredCount,
@@ -207,5 +219,11 @@ export class AssessmentStateManager {
 
   saveScores() {
     this.storageManager.saveScores(this.state.scores);
+  }
+
+  getSelectedAssessment() {
+    return AppConstants.assessments.find(
+      (entry) => entry.id === this.state.selectedAssessmentId
+    ) ?? AppConstants.assessments[0];
   }
 }

@@ -63,6 +63,12 @@ export class AssessmentCoordinator {
   }
 
   async handleChange(event) {
+    if (event.target.dataset.act === "assessment") {
+      this.stateManager.setSelectedAssessment(event.target.value);
+      this.render();
+      return;
+    }
+
     if (event.target.dataset.act !== "upload") {
       return;
     }

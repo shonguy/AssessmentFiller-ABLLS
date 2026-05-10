@@ -1,4 +1,11 @@
 export class AppConstants {
+  static assessments = [
+    {
+      id: "ablls-r",
+      name: "ABLLS-R",
+    },
+  ];
+
   static accentColors = ["#5b6472", "#727b89", "#8b95a4"];
 
   static storageKeys = {

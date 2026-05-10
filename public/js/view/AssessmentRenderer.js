@@ -41,6 +41,10 @@ export class AssessmentRenderer {
 
   renderTopbar(viewModel) {
     const themeIcon = viewModel.isDarkTheme ? "☾" : '<span style="color:#e8a838">☀</span>';
+    const assessmentOptions = viewModel.assessments.map((assessment) => {
+      const selected = assessment.id === viewModel.selectedAssessmentId ? " selected" : "";
+      return `<option value="${assessment.id}"${selected}>${HtmlEscaper.escape(assessment.name)}</option>`;
+    }).join("");
     const swatches = AppConstants.accentColors.map((color) => {
       const activeClass = viewModel.accentColor === color ? " active" : "";
       return `<button class="cpop-swatch${activeClass}" data-act="cpick" data-val="${color}" style="background:${color}"></button>`;
@@ -48,7 +52,15 @@ export class AssessmentRenderer {
 
     return `
       <div class="topbar">
-        <h1>Assessment Filler - ABLLS-R</h1>
+        <div class="assessment-title">
+          <h1>Assessment Filler</h1>
+          <label class="assessment-picker">
+            <span>Assessment</span>
+            <select data-act="assessment" aria-label="Assessment">
+              ${assessmentOptions}
+            </select>
+          </label>
+        </div>
         <div class="topbar-right">
           <button class="theme-btn" data-act="theme">${themeIcon}</button>
           <div style="position:relative">
