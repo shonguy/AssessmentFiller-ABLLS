@@ -10,6 +10,12 @@
   --green: #75a382;
   --amber: #b89b67;
   --red: #c98282;
+  --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-display: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --display-style: normal;
+  --display-weight: 700;
+  --display-tracking: -0.3px;
 }
 
 .light {
@@ -26,13 +32,106 @@
   --red: #b16d6d;
 }
 
+/* ---------- Aesthetic: Simple (default) ----------
+   Cooler, modern minimal. Geist sans, neutral grays. */
+body.aesthetic-simple {
+  --font-body: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --display-style: normal;
+  --display-weight: 600;
+  --display-tracking: -0.02em;
+  letter-spacing: -0.005em;
+}
+
+body.aesthetic-simple.light {
+  --bg: #fafaf9;
+  --s1: #ffffff;
+  --s2: #f5f5f4;
+  --s3: #e7e5e4;
+  --tx: #0c0c0e;
+  --tx2: #3f3f46;
+  --tx3: #71717a;
+  --accent: #5b6472;
+  --green: #16a34a;
+  --amber: #ca8a04;
+  --red: #dc2626;
+}
+
+body.aesthetic-simple:not(.light) {
+  --bg: #0c0d0f;
+  --s1: #161719;
+  --s2: #1f2125;
+  --s3: #2c2f35;
+  --tx: #f4f5f7;
+  --tx2: #c5cad2;
+  --tx3: #8d95a1;
+}
+
+/* ---------- Aesthetic: Classic ----------
+   Warm, decorative. Atkinson body + Instrument Serif italic display. */
+body.aesthetic-classic {
+  --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-display: 'Instrument Serif', 'Atkinson Hyperlegible', Georgia, serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --display-style: italic;
+  --display-weight: 400;
+  --display-tracking: -0.01em;
+}
+
+body.aesthetic-classic.light {
+  --bg: #f3efe7;
+  --s1: #fffdf7;
+  --s2: #ece6d8;
+  --s3: #d9d2c1;
+  --tx: #1e1b16;
+  --tx2: #3a352d;
+  --tx3: #6b6458;
+  --accent: #6b6458;
+  --green: #3e9f62;
+  --amber: #d09020;
+  --red: #c14a3a;
+}
+
+body.aesthetic-classic:not(.light) {
+  --bg: #1a1714;
+  --s1: #221e1a;
+  --s2: #2c2722;
+  --s3: #3a342d;
+  --tx: #f3eee5;
+  --tx2: #ccc4b4;
+  --tx3: #968e7d;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--tx);
   min-height: 100vh;
   transition: background 0.3s, color 0.3s;
   line-height: 1.5;
+}
+
+/* Display typography — applied to titles/section headings, not body content.
+   Each aesthetic supplies its own display font/style/weight via CSS variables.
+   Selector is intentionally body-prefixed to outrank rules in layout.css/workflow.css. */
+body .topbar h1,
+body .workflow-hero h2,
+body .workflow-checkpoint-card h2 {
+  font-family: var(--font-display);
+  font-style: var(--display-style);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+}
+
+/* Instrument Serif renders best a touch larger; bump display headings in Classic. */
+body.aesthetic-classic .topbar h1 {
+  font-size: 22px;
+}
+
+body.aesthetic-classic .workflow-hero h2,
+body.aesthetic-classic .workflow-checkpoint-card h2 {
+  font-size: 1.45em;
 }

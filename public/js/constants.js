@@ -12,6 +12,13 @@ export class AppConstants {
     scores: "ablls_sc2",
     darkTheme: "ablls_dark",
     workflow: "ablls_workflow_v1",
+    aesthetic: "ablls_aesthetic_v1",
+  };
+
+  static aesthetics = {
+    simple: "simple",
+    classic: "classic",
+    default: "simple",
   };
 
   static paths = {
