@@ -37,12 +37,14 @@ export class AssessmentActionHandler {
     if (action === "sec") {
       this.stateManager.setActiveSection(value === "ALL" ? null : value);
       this.stateManager.setMode("assess");
+      this.stateManager.collapseSidebarForSmallScreens();
       this.render();
       return true;
     }
 
     if (action === "mode") {
       this.stateManager.setMode(value);
+      this.stateManager.collapseSidebarForSmallScreens();
       this.render();
       return true;
     }

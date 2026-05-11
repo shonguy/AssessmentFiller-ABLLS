@@ -12,7 +12,7 @@
 
 .side-brand {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  grid-template-columns: 36px minmax(0, 1fr) 44px;
   gap: 10px;
   align-items: center;
   padding-bottom: 14px;
@@ -20,8 +20,8 @@
 }
 
 .side-mark {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
   border-radius: 10px;
@@ -53,8 +53,9 @@
 }
 
 .side-collapse {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
   border: 1px solid var(--s3);
   border-radius: 10px;
   background: var(--s2);
@@ -75,8 +76,8 @@
   grid-template-columns: 22px minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
-  min-height: 36px;
-  padding: 8px 10px;
+  min-height: 44px;
+  padding: 10px 12px;
   border: 1px solid transparent;
   border-radius: 12px;
   background: transparent;
@@ -155,8 +156,8 @@
   grid-template-columns: 22px minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
-  min-height: 32px;
-  padding: 6px 8px;
+  min-height: 44px;
+  padding: 9px 10px;
   border: 1px solid transparent;
   border-radius: 10px;
   background: transparent;

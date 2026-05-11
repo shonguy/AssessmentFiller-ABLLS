@@ -3,7 +3,7 @@ import { HtmlEscaper } from "../utils.js";
 export class AssessmentSidebarRenderer {
   render(viewModel) {
     return `
-      <aside class="side" aria-label="Assessment navigation">
+      <aside class="side" id="assessment-sidebar" aria-label="Assessment navigation">
         ${this.renderBrand(viewModel)}
         ${this.renderModeActions(viewModel)}
         ${this.renderSections(viewModel)}
@@ -12,14 +12,18 @@ export class AssessmentSidebarRenderer {
   }
 
   renderBrand(viewModel) {
+    const toggleLabel = viewModel.isSidebarCollapsed
+      ? "Expand section navigation"
+      : "Collapse section navigation";
+
     return `
       <div class="side-brand">
-        <div class="side-mark" style="background:linear-gradient(135deg,${viewModel.accentColor},var(--s3))">A</div>
+        <div class="side-mark" style="background:linear-gradient(135deg,${viewModel.accentColor},var(--s3))" aria-hidden="true">A</div>
         <div class="side-brand-copy">
           <strong>Assessment Filler</strong>
           <span>${HtmlEscaper.escape(viewModel.selectedAssessment.name)}</span>
         </div>
-        <button class="side-collapse" data-act="sideToggle" aria-label="Toggle section panel">
+        <button class="side-collapse" data-act="sideToggle" aria-label="${toggleLabel}" aria-expanded="${!viewModel.isSidebarCollapsed}" aria-controls="assessment-sidebar">
           ${viewModel.isSidebarCollapsed ? "›" : "‹"}
         </button>
       </div>
@@ -38,10 +42,14 @@ export class AssessmentSidebarRenderer {
 
   renderModeButton(mode, label, badge, viewModel) {
     const activeClass = viewModel.mode === mode ? " active" : "";
+    const isActive = viewModel.mode === mode;
+    const ariaCurrent = isActive ? ' aria-current="page"' : "";
+    const escapedLabel = HtmlEscaper.escape(label);
+
     return `
-      <button class="side-mode${activeClass}" data-act="mode" data-val="${mode}">
-        <span class="side-mode-icon">${this.getModeIcon(mode)}</span>
-        <span class="side-mode-label">${label}</span>
+      <button class="side-mode${activeClass}" data-act="mode" data-val="${mode}" aria-label="${escapedLabel}, ${badge}"${ariaCurrent}>
+        <span class="side-mode-icon" aria-hidden="true">${this.getModeIcon(mode)}</span>
+        <span class="side-mode-label">${escapedLabel}</span>
         <span class="side-mode-badge">${badge}</span>
       </button>
     `;
@@ -69,12 +77,13 @@ export class AssessmentSidebarRenderer {
 
   renderAllSectionsButton(viewModel) {
     const activeClass = viewModel.activeSection === null ? " active" : "";
+    const ariaCurrent = viewModel.activeSection === null ? ' aria-current="page"' : "";
 
     return `
-      <button class="side-section${activeClass}" data-act="sec" data-val="ALL" title="All sections">
-        <span class="side-section-letter">All</span>
+      <button class="side-section${activeClass}" data-act="sec" data-val="ALL" title="All sections" aria-label="All sections, ${viewModel.answeredCount} of ${viewModel.totalQuestions} answered"${ariaCurrent}>
+        <span class="side-section-letter" aria-hidden="true">All</span>
         <span class="side-section-name">All Sections</span>
-        <span class="side-section-count">${viewModel.answeredCount}/${viewModel.totalQuestions}</span>
+        <span class="side-section-count" aria-hidden="true">${viewModel.answeredCount}/${viewModel.totalQuestions}</span>
       </button>
     `;
   }
@@ -89,12 +98,14 @@ export class AssessmentSidebarRenderer {
       isDone ? "done" : "",
       isPartial ? "partial" : "",
     ].filter(Boolean).join(" ");
+    const ariaCurrent = isActive ? ' aria-current="page"' : "";
+    const escapedName = HtmlEscaper.escape(section.sectionName);
 
     return `
-      <button class="${className}" data-act="sec" data-val="${section.section}" title="${HtmlEscaper.escape(section.sectionName)}">
-        <span class="side-section-letter">${section.section}</span>
-        <span class="side-section-name">${HtmlEscaper.escape(section.sectionName)}</span>
-        <span class="side-section-count">${section.answered}/${section.questions.length}</span>
+      <button class="${className}" data-act="sec" data-val="${section.section}" title="${escapedName}" aria-label="Section ${section.section}, ${escapedName}, ${section.answered} of ${section.questions.length} answered"${ariaCurrent}>
+        <span class="side-section-letter" aria-hidden="true">${section.section}</span>
+        <span class="side-section-name">${escapedName}</span>
+        <span class="side-section-count" aria-hidden="true">${section.answered}/${section.questions.length}</span>
       </button>
     `;
   }

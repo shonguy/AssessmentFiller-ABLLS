@@ -82,6 +82,17 @@ export class AssessmentStateManager {
     this.state.isSidebarCollapsed = !this.state.isSidebarCollapsed;
   }
 
+  collapseSidebarForSmallScreens() {
+    const appElement = document.getElementById("app");
+    const isSingleColumnShell = appElement
+      ? window.getComputedStyle(appElement).display !== "grid"
+      : false;
+
+    if (window.matchMedia("(max-width: 720px)").matches || isSingleColumnShell) {
+      this.state.isSidebarCollapsed = true;
+    }
+  }
+
   setAccentColor(color) {
     this.state.accentColor = color;
   }

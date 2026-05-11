@@ -39,6 +39,9 @@ export class AssessmentRenderer {
 
   renderTopbar(viewModel) {
     const themeIcon = viewModel.isDarkTheme ? "☾" : '<span style="color:#e8a838">☀</span>';
+    const sidebarToggleLabel = viewModel.isSidebarCollapsed
+      ? "Expand section navigation"
+      : "Collapse section navigation";
     const assessmentOptions = viewModel.assessments.map((assessment) => {
       const selected = assessment.id === viewModel.selectedAssessmentId ? " selected" : "";
       return `<option value="${assessment.id}"${selected}>${HtmlEscaper.escape(assessment.name)}</option>`;
@@ -54,7 +57,7 @@ export class AssessmentRenderer {
 
     return `
       <div class="topbar">
-        <button class="side-toggle" data-act="sideToggle" aria-label="Toggle section panel">
+        <button class="side-toggle" data-act="sideToggle" aria-label="${sidebarToggleLabel}" aria-expanded="${!viewModel.isSidebarCollapsed}" aria-controls="assessment-sidebar">
           ${viewModel.isSidebarCollapsed ? "☰" : "‹"}
         </button>
         <div class="assessment-title">
