@@ -1,6 +1,39 @@
 import { AppConstants } from "../constants.js";
 
 export class StorageManager {
+  loadClients() {
+    try {
+      const savedValue = localStorage.getItem(AppConstants.storageKeys.clients);
+      return savedValue ? JSON.parse(savedValue) : [];
+    } catch (_error) {
+      return [];
+    }
+  }
+
+  saveClients(clients) {
+    try {
+      localStorage.setItem(AppConstants.storageKeys.clients, JSON.stringify(clients));
+    } catch (_error) {
+      // Ignore storage failures.
+    }
+  }
+
+  loadActiveClientId() {
+    try {
+      return localStorage.getItem(AppConstants.storageKeys.activeClient);
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  saveActiveClientId(clientId) {
+    try {
+      localStorage.setItem(AppConstants.storageKeys.activeClient, clientId);
+    } catch (_error) {
+      // Ignore storage failures.
+    }
+  }
+
   loadScores(defaultScores) {
     try {
       const savedValue = localStorage.getItem(AppConstants.storageKeys.scores);

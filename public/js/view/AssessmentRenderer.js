@@ -45,6 +45,10 @@ export class AssessmentRenderer {
       const selected = assessment.id === viewModel.selectedAssessmentId ? " selected" : "";
       return `<option value="${assessment.id}"${selected}>${HtmlEscaper.escape(assessment.name)}</option>`;
     }).join("");
+    const clientOptions = viewModel.clients.map((client) => {
+      const selected = client.id === viewModel.selectedClientId ? " selected" : "";
+      return `<option value="${HtmlEscaper.escape(client.id)}"${selected}>${HtmlEscaper.escape(client.name)}</option>`;
+    }).join("");
     const swatches = AppConstants.accentColors.map((color) => {
       const activeClass = viewModel.accentColor === color ? " active" : "";
       return `<button class="cpop-swatch${activeClass}" data-act="cpick" data-val="${color}" style="background:${color}"></button>`;
@@ -54,12 +58,21 @@ export class AssessmentRenderer {
       <div class="topbar">
         <div class="assessment-title">
           <h1>Assessment Filler</h1>
-          <label class="assessment-picker">
-            <span>Assessment</span>
-            <select data-act="assessment" aria-label="Assessment">
-              ${assessmentOptions}
-            </select>
-          </label>
+          <div class="topbar-pickers">
+            <label class="assessment-picker">
+              <span>Client</span>
+              <select data-act="client" aria-label="Client">
+                ${clientOptions}
+                <option value="${viewModel.addClientOptionId}">+ Add Client</option>
+              </select>
+            </label>
+            <label class="assessment-picker">
+              <span>Assessment</span>
+              <select data-act="assessment" aria-label="Assessment">
+                ${assessmentOptions}
+              </select>
+            </label>
+          </div>
         </div>
         <div class="topbar-right">
           <button class="theme-btn" data-act="theme">${themeIcon}</button>

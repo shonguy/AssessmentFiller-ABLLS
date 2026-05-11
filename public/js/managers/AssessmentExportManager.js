@@ -16,7 +16,9 @@ export class AssessmentExportManager {
 
   downloadJson() {
     const state = this.getState();
+    const selectedClient = state.clients?.find((client) => client.id === state.selectedClientId);
     const payload = {
+      client: selectedClient?.name,
       exportDate: new Date().toISOString(),
       highlightColor: state.accentColor,
       scores: state.scores,

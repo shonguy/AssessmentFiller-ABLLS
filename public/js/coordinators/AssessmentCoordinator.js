@@ -1,4 +1,5 @@
 import { AssessmentActionHandler } from "./AssessmentActionHandler.js";
+import { AssessmentClientManager } from "../managers/AssessmentClientManager.js";
 
 export class AssessmentCoordinator {
   constructor(renderer, stateManager, exportManager, importManager) {
@@ -63,6 +64,11 @@ export class AssessmentCoordinator {
   }
 
   async handleChange(event) {
+    if (event.target.dataset.act === "client") {
+      this.handleClientChange(event.target);
+      return;
+    }
+
     if (event.target.dataset.act === "assessment") {
       this.stateManager.setSelectedAssessment(event.target.value);
       this.render();
@@ -85,9 +91,25 @@ export class AssessmentCoordinator {
     }
   }
 
+  handleClientChange(selectElement) {
+    const state = this.stateManager.getState();
+
+    if (selectElement.value === AssessmentClientManager.addClientOptionId) {
+      const clientName = window.prompt("Client name", `Client ${state.clients.length + 1}`);
+      if (clientName && clientName.trim()) {
+        this.stateManager.addClient(clientName);
+      }
+      this.render();
+      return;
+    }
+
+    this.stateManager.setSelectedClient(selectElement.value);
+    this.render();
+  }
+
   handleKeydown(event) {
     const state = this.stateManager.getState();
-    if (state.mode !== "assess" || event.target.tagName === "INPUT") {
+    if (state.mode !== "assess" || ["INPUT", "SELECT"].includes(event.target.tagName)) {
       return;
     }
 

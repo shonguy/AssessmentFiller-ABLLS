@@ -9,6 +9,8 @@ export class AppConstants {
   static accentColors = ["#5b6472", "#727b89", "#8b95a4"];
 
   static storageKeys = {
+    activeClient: "ablls_active_client_v1",
+    clients: "ablls_clients_v1",
     scores: "ablls_sc2",
     darkTheme: "ablls_dark",
     workflow: "ablls_workflow_v1",

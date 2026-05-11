@@ -2,14 +2,17 @@ import { AppConstants } from "../constants.js";
 import { AssessmentSessionManager } from "./AssessmentSessionManager.js";
 
 export class AssessmentStateManager {
-  constructor(dataManager, storageManager, workflowManager) {
+  constructor(dataManager, storageManager, workflowManager, clientManager) {
     this.dataManager = dataManager;
     this.storageManager = storageManager;
     this.workflowManager = workflowManager;
+    this.clientManager = clientManager;
     this.state = {
       currentIndex: 0,
       mode: "home",
       activeSection: null,
+      clients: [],
+      selectedClientId: null,
       selectedAssessmentId: AppConstants.assessments[0].id,
       accentColor: AppConstants.accentColors[0],
       checkpointSection: null,
@@ -27,10 +30,20 @@ export class AssessmentStateManager {
       storageManager,
       workflowManager
     );
+    this.sessionManager.setWorkflowChangeHandler(() => this.saveCurrentClientState());
   }
 
   initialize() {
-    this.sessionManager.initialize(this.dataManager.getDefaultScores());
+    const defaultWorkflowState = this.sessionManager.getDefaultWorkflowState();
+    const clientState = this.clientManager.initialize(
+      this.dataManager.getDefaultScores(),
+      defaultWorkflowState
+    );
+
+    this.state.clients = clientState.clients;
+    this.state.selectedClientId = clientState.activeClient.id;
+    this.sessionManager.initialize(clientState.activeClient.scores, clientState.activeClient.workflow);
+    this.state.isDarkTheme = this.storageManager.loadThemePreference();
     this.applyTheme();
   }
 
@@ -74,6 +87,32 @@ export class AssessmentStateManager {
     }
 
     this.state.selectedAssessmentId = assessment.id;
+  }
+
+  addClient(clientName) {
+    this.saveCurrentClientState();
+    const clientState = this.clientManager.addClient(
+      this.state.clients,
+      clientName,
+      this.dataManager.getDefaultScores(),
+      this.sessionManager.getDefaultWorkflowState()
+    );
+
+    this.applyClientState(clientState.clients, clientState.activeClient);
+  }
+
+  setSelectedClient(clientId) {
+    if (clientId === this.state.selectedClientId) {
+      return;
+    }
+
+    this.saveCurrentClientState();
+    const activeClient = this.clientManager.selectClient(this.state.clients, clientId);
+    if (!activeClient) {
+      return;
+    }
+
+    this.applyClientState(this.state.clients, activeClient);
   }
 
   setActiveSection(section) {
@@ -192,7 +231,9 @@ export class AssessmentStateManager {
     return {
       ...this.state,
       assessments: AppConstants.assessments,
+      addClientOptionId: this.clientManager.constructor.addClientOptionId,
       selectedAssessment: this.getSelectedAssessment(),
+      selectedClient: this.getSelectedClient(),
       checkpoint: this.workflowManager.buildCheckpoint(this.state.checkpointSection, this.state.scores),
       filteredQuestions,
       answeredCount,
@@ -219,11 +260,45 @@ export class AssessmentStateManager {
 
   saveScores() {
     this.storageManager.saveScores(this.state.scores);
+    this.state.clients = this.clientManager.saveClientState(
+      this.state.clients,
+      this.state.selectedClientId,
+      this.state.scores,
+      this.sessionManager.getCurrentWorkflowState()
+    );
   }
 
   getSelectedAssessment() {
     return AppConstants.assessments.find(
       (entry) => entry.id === this.state.selectedAssessmentId
     ) ?? AppConstants.assessments[0];
+  }
+
+  getSelectedClient() {
+    return this.clientManager.findClient(this.state.clients, this.state.selectedClientId);
+  }
+
+  saveCurrentClientState() {
+    if (!this.state.selectedClientId) {
+      return;
+    }
+
+    this.state.clients = this.clientManager.saveClientState(
+      this.state.clients,
+      this.state.selectedClientId,
+      this.state.scores,
+      this.sessionManager.getCurrentWorkflowState()
+    );
+  }
+
+  applyClientState(clients, activeClient) {
+    this.state.clients = clients;
+    this.state.selectedClientId = activeClient.id;
+    this.state.activeSection = null;
+    this.state.currentIndex = 0;
+    this.state.mode = "home";
+    this.state.checkpointSection = null;
+    this.state.isFocusedView = false;
+    this.sessionManager.initialize(activeClient.scores, activeClient.workflow);
   }
 }

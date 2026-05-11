@@ -4,12 +4,11 @@ export class AssessmentSessionManager {
     this.dataManager = dataManager;
     this.storageManager = storageManager;
     this.workflowManager = workflowManager;
+    this.workflowChangeHandler = null;
   }
 
-  initialize(defaultScores) {
-    this.state.scores = this.storageManager.loadScores(defaultScores);
-    this.state.isDarkTheme = this.storageManager.loadThemePreference();
-    const workflowState = this.storageManager.loadWorkflowState(this.getDefaultWorkflowState());
+  initialize(scores, workflowState) {
+    this.state.scores = scores;
     this.state.lastQuestionId = workflowState.lastQuestionId;
     this.state.lastSection = workflowState.lastSection;
     this.state.questionFilter = workflowState.questionFilter;
@@ -99,11 +98,8 @@ export class AssessmentSessionManager {
 
     this.state.lastQuestionId = currentQuestion.id;
     this.state.lastSection = currentQuestion.s;
-    this.storageManager.saveWorkflowState({
-      lastQuestionId: this.state.lastQuestionId,
-      lastSection: this.state.lastSection,
-      questionFilter: this.state.questionFilter,
-    });
+    this.storageManager.saveWorkflowState(this.getCurrentWorkflowState());
+    this.workflowChangeHandler?.();
   }
 
   startQuestionFlow(target, questionFilter) {
@@ -141,5 +137,17 @@ export class AssessmentSessionManager {
       lastSection: null,
       questionFilter: "all",
     };
+  }
+
+  getCurrentWorkflowState() {
+    return {
+      lastQuestionId: this.state.lastQuestionId,
+      lastSection: this.state.lastSection,
+      questionFilter: this.state.questionFilter,
+    };
+  }
+
+  setWorkflowChangeHandler(handler) {
+    this.workflowChangeHandler = handler;
   }
 }

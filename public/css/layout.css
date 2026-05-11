@@ -37,6 +37,13 @@
   font-weight: 600;
 }
 
+.topbar-pickers {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .assessment-picker span {
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -117,6 +124,11 @@
 
   .assessment-picker {
     flex: 1;
+    justify-content: flex-end;
+  }
+
+  .topbar-pickers {
+    width: 100%;
     justify-content: flex-end;
   }
 
