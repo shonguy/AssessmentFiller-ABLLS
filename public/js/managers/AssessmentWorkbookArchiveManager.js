@@ -63,6 +63,10 @@ export class AssessmentWorkbookArchiveManager {
     cell.removeAttribute("t");
   }
 
+  hasCell(worksheetState, cellAddress) {
+    return worksheetState.cellMap.has(cellAddress);
+  }
+
   serializeXmlDocument(document) {
     return new XMLSerializer().serializeToString(document);
   }

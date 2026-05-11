@@ -28,9 +28,9 @@ export class AssessmentWorkbookTemplateManager {
 
   resolveAssessmentCode(assessmentCode) {
     const normalizedCode = Number.parseInt(assessmentCode, 10);
-    const { defaultAssessmentCode, runSlotCount } = AppConstants.workbookTemplate;
+    const { defaultAssessmentCode, runSlotRows } = AppConstants.workbookTemplate;
 
-    if (Number.isNaN(normalizedCode) || normalizedCode < 1 || normalizedCode > runSlotCount) {
+    if (Number.isNaN(normalizedCode) || normalizedCode < 1 || normalizedCode > runSlotRows.length) {
       return defaultAssessmentCode;
     }
 
@@ -38,8 +38,7 @@ export class AssessmentWorkbookTemplateManager {
   }
 
   getRunSlotRow(assessmentCode) {
-    const { runSlotStartRow, runSlotRowStep } = AppConstants.workbookTemplate;
-    return runSlotStartRow + ((assessmentCode - 1) * runSlotRowStep);
+    return AppConstants.workbookTemplate.runSlotRows[assessmentCode - 1];
   }
 
   buildExcelDateValue(assessmentDate) {
@@ -59,9 +58,13 @@ export class AssessmentWorkbookTemplateManager {
   }
 
   clearAssessmentMetadata(worksheetState) {
-    for (let code = 1; code <= AppConstants.workbookTemplate.runSlotCount; code += 1) {
-      this.archiveManager.clearCellValue(worksheetState, `I${this.getRunSlotRow(code)}`);
-    }
+    AppConstants.workbookTemplate.runSlotRows.forEach((row) => {
+      const cellAddress = `I${row}`;
+
+      if (this.archiveManager.hasCell(worksheetState, cellAddress)) {
+        this.archiveManager.clearCellValue(worksheetState, cellAddress);
+      }
+    });
   }
 
   clearScores(worksheetState) {

@@ -24,9 +24,7 @@ export class AppConstants {
   static workbookTemplate = {
     defaultAssessmentCode: 1,
     metadataSheetName: "AssessmentFiller Data",
-    runSlotCount: 6,
-    runSlotStartRow: 8,
-    runSlotRowStep: 3,
+    runSlotRows: [8, 11, 14, 17, 20, 23, 26, 28],
     worksheetName: "ABLLs",
   };
 }
