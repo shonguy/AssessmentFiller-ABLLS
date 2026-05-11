@@ -90,7 +90,7 @@ export class AssessmentBodyRenderer {
     const hasScore = score !== undefined;
     const scoreValue = hasScore ? score : 0;
     const tierBlocks = question.t
-      .map((tier, index) => this.renderTierBlock(question.id, tier, index + 1, scoreValue, hasScore))
+      .map((tier, index) => this.renderTierBlock(question.id, tier, index + 1, scoreValue, hasScore, viewModel.accentColor))
       .join("");
     const noneSelected = hasScore && score === 0;
     const answeredHint = hasScore
@@ -119,14 +119,12 @@ export class AssessmentBodyRenderer {
     `;
   }
 
-  renderTierBlock(questionId, tierText, tierNumber, scoreValue, hasScore) {
+  renderTierBlock(questionId, tierText, tierNumber, scoreValue, hasScore, accentColor) {
     const isSelected = hasScore && scoreValue >= tierNumber;
     const isExact = hasScore && scoreValue === tierNumber;
-    const selectedBackground = "color-mix(in srgb, var(--green) 32%, var(--s2))";
-    const exactBackground = "color-mix(in srgb, var(--green) 48%, var(--s2))";
-    const background = isExact ? exactBackground : isSelected ? selectedBackground : "var(--s2)";
-    const borderColor = isSelected ? "var(--green)" : "var(--s3)";
-    const shadow = isExact ? "0 0 0 3px color-mix(in srgb, var(--green) 28%, transparent)" : "none";
+    const background = isExact ? `${accentColor}26` : isSelected ? `${accentColor}14` : "var(--s2)";
+    const borderColor = isExact ? accentColor : isSelected ? `${accentColor}66` : "transparent";
+    const shadow = isExact ? `0 0 24px ${accentColor}22` : "none";
 
     return `
       <div class="tblk${isSelected ? " sel" : ""}" data-act="tier" data-id="${questionId}" data-tn="${tierNumber}" style="background:${background};border-color:${borderColor};box-shadow:${shadow}">

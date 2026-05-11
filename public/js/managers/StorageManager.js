@@ -35,26 +35,6 @@ export class StorageManager {
     }
   }
 
-  loadAesthetic() {
-    try {
-      const savedValue = localStorage.getItem(AppConstants.storageKeys.aesthetic);
-      if (savedValue === AppConstants.aesthetics.simple || savedValue === AppConstants.aesthetics.classic) {
-        return savedValue;
-      }
-      return AppConstants.aesthetics.default;
-    } catch (_error) {
-      return AppConstants.aesthetics.default;
-    }
-  }
-
-  saveAesthetic(aesthetic) {
-    try {
-      localStorage.setItem(AppConstants.storageKeys.aesthetic, aesthetic);
-    } catch (_error) {
-      // Ignore storage failures.
-    }
-  }
-
   loadWorkflowState(defaultState) {
     try {
       const savedValue = localStorage.getItem(AppConstants.storageKeys.workflow);

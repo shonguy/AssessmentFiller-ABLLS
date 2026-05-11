@@ -9,7 +9,6 @@ export class AssessmentSessionManager {
   initialize(defaultScores) {
     this.state.scores = this.storageManager.loadScores(defaultScores);
     this.state.isDarkTheme = this.storageManager.loadThemePreference();
-    this.state.aesthetic = this.storageManager.loadAesthetic();
     const workflowState = this.storageManager.loadWorkflowState(this.getDefaultWorkflowState());
     this.state.lastQuestionId = workflowState.lastQuestionId;
     this.state.lastSection = workflowState.lastSection;

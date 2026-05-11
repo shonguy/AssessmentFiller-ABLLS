@@ -28,18 +28,6 @@ export class AssessmentActionHandler {
       return true;
     }
 
-    if (action === "settingsToggle") {
-      this.stateManager.toggleSettings();
-      this.render();
-      return true;
-    }
-
-    if (action === "aesthetic") {
-      this.stateManager.setAesthetic(value);
-      this.render();
-      return true;
-    }
-
     if (action === "sec") {
       this.stateManager.setActiveSection(value === "ALL" ? null : value);
       this.render();

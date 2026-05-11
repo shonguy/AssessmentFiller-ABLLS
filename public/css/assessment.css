@@ -54,7 +54,6 @@
   transition: all 0.25s;
   display: flex;
   flex-direction: column;
-  position: relative;
 }
 
 .tblk:hover {
@@ -76,34 +75,6 @@
   color: var(--tx2);
 }
 
-.tblk.sel {
-  color: var(--tx);
-  font-weight: 700;
-  outline: 1px solid color-mix(in srgb, var(--green) 50%, transparent);
-}
-
-.tblk.sel::after {
-  content: "✓";
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 24px;
-  height: 24px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: var(--green);
-  color: var(--bg);
-  font-size: 15px;
-  font-weight: 800;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.22);
-}
-
-.tblk.sel .ttxt {
-  color: var(--tx);
-  padding-right: 26px;
-}
-
 .tnone {
   min-height: 104px;
   padding: 18px;
@@ -117,7 +88,6 @@
   transition: all 0.25s;
   flex-direction: column;
   flex: 0 0 110px;
-  position: relative;
 }
 
 .tnone:hover {
@@ -125,9 +95,8 @@
 }
 
 .tnone.sel {
-  border-color: var(--amber);
-  background: color-mix(in srgb, var(--amber) 36%, var(--s2));
-  outline: 1px solid color-mix(in srgb, var(--amber) 50%, transparent);
+  border-color: var(--tx2);
+  background: var(--s3);
 }
 
 .tnone span {
@@ -138,22 +107,6 @@
 
 .tnone.sel span {
   color: var(--tx);
-}
-
-.tnone.sel::after {
-  content: "✓";
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: var(--amber);
-  color: var(--bg);
-  font-size: 13px;
-  font-weight: 800;
 }
 
 .tnone-label {

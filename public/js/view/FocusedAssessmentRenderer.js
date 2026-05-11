@@ -21,7 +21,7 @@ export class FocusedAssessmentRenderer {
       Math.round(((viewModel.currentIndex + 1) / viewModel.filteredQuestions.length) * 100)
     );
     const tierBlocks = question.t
-      .map((tier, index) => this.renderTierBlock(question.id, tier, index + 1, scoreValue, hasScore))
+      .map((tier, index) => this.renderTierBlock(question.id, tier, index + 1, scoreValue, hasScore, viewModel.accentColor))
       .join("");
 
     return `
@@ -51,13 +51,11 @@ export class FocusedAssessmentRenderer {
     `;
   }
 
-  renderTierBlock(questionId, tierText, tierNumber, scoreValue, hasScore) {
+  renderTierBlock(questionId, tierText, tierNumber, scoreValue, hasScore, accentColor) {
     const isSelected = hasScore && scoreValue >= tierNumber;
     const isExact = hasScore && scoreValue === tierNumber;
-    const selectedBackground = "color-mix(in srgb, var(--green) 32%, var(--s2))";
-    const exactBackground = "color-mix(in srgb, var(--green) 48%, var(--s2))";
-    const background = isExact ? exactBackground : isSelected ? selectedBackground : "var(--s2)";
-    const borderColor = isSelected ? "var(--green)" : "var(--s3)";
+    const background = isExact ? `${accentColor}20` : isSelected ? `${accentColor}12` : "var(--s2)";
+    const borderColor = isExact ? accentColor : isSelected ? `${accentColor}66` : "var(--s3)";
 
     return `
       <button class="focused-option${isSelected ? " sel" : ""}" data-act="tier" data-id="${questionId}" data-tn="${tierNumber}" style="background:${background};border-color:${borderColor}">

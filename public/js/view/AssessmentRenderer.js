@@ -74,34 +74,7 @@ export class AssessmentRenderer {
               </div>
             </div>
           </div>
-          ${this.renderSettingsPopover(viewModel)}
           <span class="counter">${viewModel.answeredCount} / ${viewModel.totalQuestions}</span>
-        </div>
-      </div>
-    `;
-  }
-
-  renderSettingsPopover(viewModel) {
-    const aesthetic = viewModel.aesthetic ?? AppConstants.aesthetics.default;
-    const simpleActive = aesthetic === AppConstants.aesthetics.simple ? " active" : "";
-    const classicActive = aesthetic === AppConstants.aesthetics.classic ? " active" : "";
-    const openClass = viewModel.isSettingsOpen ? " open" : "";
-
-    return `
-      <div style="position:relative">
-        <button class="settings-btn" data-act="settingsToggle" aria-label="Settings" aria-expanded="${viewModel.isSettingsOpen ? "true" : "false"}">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path>
-          </svg>
-        </button>
-        <div class="settings-pop${openClass}" role="dialog" aria-label="Settings">
-          <div class="settings-pop-label">Aesthetic</div>
-          <div class="settings-aesthetic">
-            <button class="settings-aesthetic-btn${simpleActive}" data-act="aesthetic" data-val="${AppConstants.aesthetics.simple}">Simple</button>
-            <button class="settings-aesthetic-btn${classicActive}" data-act="aesthetic" data-val="${AppConstants.aesthetics.classic}">Classic</button>
-          </div>
-          <p class="settings-pop-hint">Switch the visual style. Light/dark and accent color stay where you set them.</p>
         </div>
       </div>
     `;

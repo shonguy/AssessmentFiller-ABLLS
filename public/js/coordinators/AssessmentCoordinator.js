@@ -37,27 +37,12 @@ export class AssessmentCoordinator {
 
   handleOutsideClick(event) {
     const state = this.stateManager.getState();
-    let shouldRender = false;
-
     if (
       state.isColorPickerOpen
       && !event.target.closest(".cpop")
       && !event.target.classList.contains("color-dot")
     ) {
       this.stateManager.closeColorPicker();
-      shouldRender = true;
-    }
-
-    if (
-      state.isSettingsOpen
-      && !event.target.closest(".settings-pop")
-      && !event.target.closest(".settings-btn")
-    ) {
-      this.stateManager.closeSettings();
-      shouldRender = true;
-    }
-
-    if (shouldRender) {
       this.render();
     }
   }

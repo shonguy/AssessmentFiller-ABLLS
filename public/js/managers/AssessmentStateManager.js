@@ -12,11 +12,9 @@ export class AssessmentStateManager {
       activeSection: null,
       selectedAssessmentId: AppConstants.assessments[0].id,
       accentColor: AppConstants.accentColors[0],
-      aesthetic: AppConstants.aesthetics.default,
       checkpointSection: null,
       isFocusedView: false,
       isColorPickerOpen: false,
-      isSettingsOpen: false,
       isDarkTheme: true,
       lastQuestionId: null,
       lastSection: null,
@@ -34,7 +32,6 @@ export class AssessmentStateManager {
   initialize() {
     this.sessionManager.initialize(this.dataManager.getDefaultScores());
     this.applyTheme();
-    this.applyAesthetic();
   }
 
   getState() {
@@ -60,32 +57,10 @@ export class AssessmentStateManager {
 
   toggleColorPicker() {
     this.state.isColorPickerOpen = !this.state.isColorPickerOpen;
-    if (this.state.isColorPickerOpen) {
-      this.state.isSettingsOpen = false;
-    }
   }
 
   closeColorPicker() {
     this.state.isColorPickerOpen = false;
-  }
-
-  toggleSettings() {
-    this.state.isSettingsOpen = !this.state.isSettingsOpen;
-    if (this.state.isSettingsOpen) {
-      this.state.isColorPickerOpen = false;
-    }
-  }
-
-  closeSettings() {
-    this.state.isSettingsOpen = false;
-  }
-
-  setAesthetic(aesthetic) {
-    if (aesthetic !== AppConstants.aesthetics.simple && aesthetic !== AppConstants.aesthetics.classic) {
-      return;
-    }
-    this.state.aesthetic = aesthetic;
-    this.applyAesthetic();
   }
 
   setAccentColor(color) {
@@ -240,13 +215,6 @@ export class AssessmentStateManager {
   applyTheme() {
     document.body.classList.toggle("light", !this.state.isDarkTheme);
     this.storageManager.saveThemePreference(this.state.isDarkTheme);
-  }
-
-  applyAesthetic() {
-    const isClassic = this.state.aesthetic === AppConstants.aesthetics.classic;
-    document.body.classList.toggle("aesthetic-classic", isClassic);
-    document.body.classList.toggle("aesthetic-simple", !isClassic);
-    this.storageManager.saveAesthetic(this.state.aesthetic);
   }
 
   saveScores() {

@@ -115,7 +115,6 @@
   text-align: left;
   cursor: pointer;
   transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-  position: relative;
 }
 
 .focused-option:hover,
@@ -126,40 +125,7 @@
 
 .focused-option.sel,
 .focused-none.sel {
-  color: var(--tx);
-  font-weight: 700;
-  outline: 1px solid color-mix(in srgb, var(--green) 50%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 18%, transparent);
-}
-
-.focused-option.sel::after,
-.focused-none.sel::after {
-  content: "✓";
-  position: absolute;
-  top: 50%;
-  right: 14px;
-  transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: var(--green);
-  color: var(--bg);
-  font-size: 15px;
-  font-weight: 800;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.22);
-}
-
-.focused-none.sel {
-  border-color: var(--amber);
-  background: color-mix(in srgb, var(--amber) 36%, var(--s2));
-  outline-color: color-mix(in srgb, var(--amber) 50%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 18%, transparent);
-}
-
-.focused-none.sel::after {
-  background: var(--amber);
+  background: var(--s3);
 }
 
 .focused-option-text,
@@ -167,7 +133,6 @@
   display: block;
   font-size: 15px;
   line-height: 1.42;
-  padding-right: 34px;
 }
 
 .focused-nav {
