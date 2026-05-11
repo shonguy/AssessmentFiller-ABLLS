@@ -1,15 +1,19 @@
 import { AppConstants } from "../constants.js";
 import { HtmlEscaper } from "../utils.js";
 import { AssessmentBodyRenderer } from "./AssessmentBodyRenderer.js";
+import { AssessmentSidebarRenderer } from "./AssessmentSidebarRenderer.js";
 
 export class AssessmentRenderer {
   constructor(rootElement) {
     this.rootElement = rootElement;
     this.bodyRenderer = new AssessmentBodyRenderer();
+    this.sidebarRenderer = new AssessmentSidebarRenderer();
   }
 
   render(viewModel) {
     this.rootElement.classList.toggle("app-focused", viewModel.isFocusedView);
+    this.rootElement.classList.toggle("app-shell", !viewModel.isFocusedView);
+    this.rootElement.classList.toggle("app-sidebar-collapsed", viewModel.isSidebarCollapsed);
 
     if (viewModel.isFocusedView) {
       this.rootElement.innerHTML = this.bodyRenderer.render(viewModel);
@@ -17,25 +21,19 @@ export class AssessmentRenderer {
     }
 
     const bodyHtml = this.bodyRenderer.render(viewModel);
-    if (viewModel.mode === "home" || viewModel.mode === "checkpoint") {
-      this.rootElement.innerHTML = `
-        ${this.renderTopbar(viewModel)}
+    const pageHtml = viewModel.mode === "home" || viewModel.mode === "checkpoint"
+      ? bodyHtml
+      : `
+        ${this.renderToolbar(viewModel)}
         ${bodyHtml}
       `;
-      return;
-    }
-
-    const sectionsHtml = this.renderSectionButtons(viewModel);
 
     this.rootElement.innerHTML = `
-      ${this.renderTopbar(viewModel)}
-      <div class="pbar">
-        <div class="pfill" style="width:${viewModel.progressPercent}%;background:linear-gradient(90deg,${viewModel.accentColor},var(--tx2))"></div>
-      </div>
-      <div class="snav">${sectionsHtml}</div>
-      ${this.renderToolbar(viewModel)}
-      ${this.renderModeToggle(viewModel)}
-      ${bodyHtml}
+      ${this.sidebarRenderer.render(viewModel)}
+      <main class="app-main">
+        ${this.renderTopbar(viewModel)}
+        ${pageHtml}
+      </main>
     `;
   }
 
@@ -56,6 +54,9 @@ export class AssessmentRenderer {
 
     return `
       <div class="topbar">
+        <button class="side-toggle" data-act="sideToggle" aria-label="Toggle section panel">
+          ${viewModel.isSidebarCollapsed ? "☰" : "‹"}
+        </button>
         <div class="assessment-title">
           <h1>Assessment Filler</h1>
           <div class="topbar-pickers">
@@ -75,6 +76,7 @@ export class AssessmentRenderer {
           </div>
         </div>
         <div class="topbar-right">
+          ${this.renderTopbarProgress(viewModel)}
           <button class="theme-btn" data-act="theme">${themeIcon}</button>
           <div style="position:relative">
             <button class="color-dot" data-act="cpToggle" style="background:${viewModel.accentColor}"></button>
@@ -93,34 +95,15 @@ export class AssessmentRenderer {
     `;
   }
 
-  renderSectionButtons(viewModel) {
-    const allButton = this.renderSectionButton("All", null, viewModel);
-    const sectionButtons = viewModel.sections
-      .map((section) => this.renderSectionButton(section.section, section.section, viewModel))
-      .join("");
-
-    return `${allButton}${sectionButtons}`;
-  }
-
-  renderSectionButton(label, value, viewModel) {
-    if (value === null) {
-      const activeClass = viewModel.activeSection === null ? " active" : "";
-      const style = viewModel.activeSection === null ? `background:${viewModel.accentColor}` : "";
-      return `<button class="sbtn${activeClass}" data-act="sec" data-val="ALL" style="${style}">${label}</button>`;
-    }
-
-    const section = viewModel.sections.find((entry) => entry.section === value);
-    let className = "sbtn";
-    if (viewModel.activeSection === value) {
-      className += " active";
-    } else if (section.answered === section.questions.length) {
-      className += " done";
-    } else if (section.answered > 0) {
-      className += " partial";
-    }
-
-    const style = viewModel.activeSection === value ? `background:${viewModel.accentColor}` : "";
-    return `<button class="${className}" data-act="sec" data-val="${value}" style="${style}" title="${HtmlEscaper.escape(section.sectionName)}">${label}</button>`;
+  renderTopbarProgress(viewModel) {
+    return `
+      <div class="topbar-progress" aria-label="${viewModel.progressPercent}% complete">
+        <div class="topbar-progress-track">
+          <div class="topbar-progress-fill" style="width:${viewModel.progressPercent}%;background:${viewModel.accentColor}"></div>
+        </div>
+        <span>${viewModel.progressPercent}%</span>
+      </div>
+    `;
   }
 
   renderToolbar(viewModel) {
@@ -139,22 +122,6 @@ export class AssessmentRenderer {
         <label class="ulbtn">Upload .xlsx<input type="file" accept=".xlsx" data-act="upload"></label>
       </div>
     `;
-  }
-
-  renderModeToggle(viewModel) {
-    return `
-      <div class="mtog">
-        ${this.renderModeButton("assess", "Assess", viewModel)}
-        ${this.renderModeButton("summary", "Summary", viewModel)}
-        ${this.renderModeButton("list", "Question List", viewModel)}
-      </div>
-    `;
-  }
-
-  renderModeButton(mode, label, viewModel) {
-    const isActive = viewModel.mode === mode;
-    const activeStyle = isActive ? `background:${viewModel.accentColor};border-color:${viewModel.accentColor}` : "";
-    return `<button class="mbtn${isActive ? " active" : ""}" data-act="mode" data-val="${mode}" style="${activeStyle}">${label}</button>`;
   }
 
 }

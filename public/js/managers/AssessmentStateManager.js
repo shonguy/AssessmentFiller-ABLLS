@@ -18,6 +18,7 @@ export class AssessmentStateManager {
       checkpointSection: null,
       isFocusedView: false,
       isColorPickerOpen: false,
+      isSidebarCollapsed: false,
       isDarkTheme: true,
       lastQuestionId: null,
       lastSection: null,
@@ -44,6 +45,7 @@ export class AssessmentStateManager {
     this.state.selectedClientId = clientState.activeClient.id;
     this.sessionManager.initialize(clientState.activeClient.scores, clientState.activeClient.workflow);
     this.state.isDarkTheme = this.storageManager.loadThemePreference();
+    this.state.isSidebarCollapsed = window.matchMedia("(max-width: 720px)").matches;
     this.applyTheme();
   }
 
@@ -74,6 +76,10 @@ export class AssessmentStateManager {
 
   closeColorPicker() {
     this.state.isColorPickerOpen = false;
+  }
+
+  toggleSidebar() {
+    this.state.isSidebarCollapsed = !this.state.isSidebarCollapsed;
   }
 
   setAccentColor(color) {

@@ -1,0 +1,253 @@
+.side {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 0;
+  padding: 14px 12px;
+  background: var(--s1);
+  border-right: 1px solid var(--s3);
+}
+
+.side-brand {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  gap: 10px;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--s2);
+}
+
+.side-mark {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.side-brand-copy {
+  min-width: 0;
+}
+
+.side-brand-copy strong,
+.side-brand-copy span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.side-brand-copy strong {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.side-brand-copy span {
+  color: var(--tx3);
+  font-size: 12px;
+}
+
+.side-collapse {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--s3);
+  border-radius: 10px;
+  background: var(--s2);
+  color: var(--tx2);
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.side-modes {
+  display: grid;
+  gap: 6px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--s2);
+}
+
+.side-mode {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--tx2);
+  cursor: pointer;
+  text-align: left;
+}
+
+.side-mode:hover,
+.side-section:hover {
+  background: var(--s2);
+}
+
+.side-mode.active {
+  background: color-mix(in srgb, var(--accent) 18%, var(--s1));
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--s3));
+  color: var(--tx);
+}
+
+.side-mode-icon {
+  font-size: 13px;
+  text-align: center;
+}
+
+.side-mode-label,
+.side-section-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.side-mode-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.side-mode-badge,
+.side-section-count,
+.side-section-head {
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.side-mode-badge,
+.side-section-count {
+  color: var(--tx3);
+}
+
+.side-section-group {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  padding-top: 14px;
+}
+
+.side-section-head {
+  display: flex;
+  justify-content: space-between;
+  color: var(--tx3);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.side-sections {
+  display: grid;
+  gap: 4px;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.side-section {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--tx2);
+  cursor: pointer;
+  text-align: left;
+}
+
+.side-section.active {
+  background: color-mix(in srgb, var(--accent) 18%, var(--s1));
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--s3));
+}
+
+.side-section-letter {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--s2);
+  color: var(--tx2);
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.side-section.active .side-section-letter {
+  background: var(--accent);
+  color: #fff;
+}
+
+.side-section.done .side-section-letter {
+  background: var(--green);
+  color: var(--bg);
+}
+
+.side-section.partial .side-section-count,
+.side-section.done .side-section-count {
+  color: var(--green);
+}
+
+.side-section-name {
+  font-size: 12.5px;
+}
+
+.app-sidebar-collapsed .side {
+  padding-inline: 10px;
+}
+
+.app-sidebar-collapsed .side-brand {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+.app-sidebar-collapsed .side-collapse {
+  display: none;
+}
+
+.app-sidebar-collapsed .side-brand-copy,
+.app-sidebar-collapsed .side-section-head,
+.app-sidebar-collapsed .side-mode-label,
+.app-sidebar-collapsed .side-mode-badge,
+.app-sidebar-collapsed .side-section-name,
+.app-sidebar-collapsed .side-section-count {
+  display: none;
+}
+
+.app-sidebar-collapsed .side-mode,
+.app-sidebar-collapsed .side-section {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  padding-inline: 6px;
+}
+
+@media (max-width: 720px) {
+  .side {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 30;
+    max-height: min(58vh, 420px);
+    height: auto;
+    border: 1px solid var(--s3);
+    border-right: none;
+    border-radius: 22px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+  }
+
+  .side-sections {
+    max-height: 34vh;
+  }
+}

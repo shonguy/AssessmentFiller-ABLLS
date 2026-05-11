@@ -28,8 +28,15 @@ export class AssessmentActionHandler {
       return true;
     }
 
+    if (action === "sideToggle") {
+      this.stateManager.toggleSidebar();
+      this.render();
+      return true;
+    }
+
     if (action === "sec") {
       this.stateManager.setActiveSection(value === "ALL" ? null : value);
+      this.stateManager.setMode("assess");
       this.render();
       return true;
     }
