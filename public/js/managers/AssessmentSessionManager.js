@@ -14,6 +14,10 @@ export class AssessmentSessionManager {
     this.state.questionFilter = workflowState.questionFilter;
   }
 
+  setDataManager(dataManager) {
+    this.dataManager = dataManager;
+  }
+
   openHome() {
     this.state.mode = "home";
     this.state.checkpointSection = null;
@@ -98,7 +102,6 @@ export class AssessmentSessionManager {
 
     this.state.lastQuestionId = currentQuestion.id;
     this.state.lastSection = currentQuestion.s;
-    this.storageManager.saveWorkflowState(this.getCurrentWorkflowState());
     this.workflowChangeHandler?.();
   }
 

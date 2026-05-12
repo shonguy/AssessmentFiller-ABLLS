@@ -2,8 +2,9 @@ import { AppConstants } from "../constants.js";
 import { AssessmentSessionManager } from "./AssessmentSessionManager.js";
 
 export class AssessmentStateManager {
-  constructor(dataManager, storageManager, workflowManager, clientManager) {
-    this.dataManager = dataManager;
+  constructor(catalogManager, storageManager, workflowManager, clientManager) {
+    this.catalogManager = catalogManager;
+    this.dataManager = catalogManager.getDataManager(catalogManager.getDefaultAssessment().id);
     this.storageManager = storageManager;
     this.workflowManager = workflowManager;
     this.clientManager = clientManager;
@@ -13,7 +14,7 @@ export class AssessmentStateManager {
       activeSection: null,
       clients: [],
       selectedClientId: null,
-      selectedAssessmentId: AppConstants.assessments[0].id,
+      selectedAssessmentId: catalogManager.getDefaultAssessment().id,
       accentColor: AppConstants.accentColors[0],
       checkpointSection: null,
       isFocusedView: false,
@@ -27,7 +28,7 @@ export class AssessmentStateManager {
     };
     this.sessionManager = new AssessmentSessionManager(
       this.state,
-      dataManager,
+      this.dataManager,
       storageManager,
       workflowManager
     );
@@ -35,15 +36,15 @@ export class AssessmentStateManager {
   }
 
   initialize() {
-    const defaultWorkflowState = this.sessionManager.getDefaultWorkflowState();
+    this.state.selectedAssessmentId = this.resolveActiveAssessmentId();
+    this.useAssessmentData(this.state.selectedAssessmentId);
     const clientState = this.clientManager.initialize(
-      this.dataManager.getDefaultScores(),
-      defaultWorkflowState
+      this.buildDefaultAssessmentStates()
     );
 
     this.state.clients = clientState.clients;
     this.state.selectedClientId = clientState.activeClient.id;
-    this.sessionManager.initialize(clientState.activeClient.scores, clientState.activeClient.workflow);
+    this.applyClientAssessmentState(clientState.activeClient);
     this.state.isDarkTheme = this.storageManager.loadThemePreference();
     this.state.isSidebarCollapsed = window.matchMedia("(max-width: 720px)").matches;
     this.applyTheme();
@@ -51,6 +52,10 @@ export class AssessmentStateManager {
 
   getState() {
     return this.state;
+  }
+
+  getDataManager() {
+    return this.dataManager;
   }
 
   getFilteredQuestions() {
@@ -98,12 +103,21 @@ export class AssessmentStateManager {
   }
 
   setSelectedAssessment(assessmentId) {
-    const assessment = AppConstants.assessments.find((entry) => entry.id === assessmentId);
+    const assessment = this.catalogManager.getAssessment(assessmentId);
     if (!assessment) {
       return;
     }
 
+    if (assessment.id === this.state.selectedAssessmentId) {
+      return;
+    }
+
+    this.saveCurrentClientState();
     this.state.selectedAssessmentId = assessment.id;
+    this.storageManager.saveActiveAssessmentId(assessment.id);
+    this.useAssessmentData(assessment.id);
+    this.resetWorkflowSurface();
+    this.applyClientAssessmentState(this.getSelectedClient());
   }
 
   addClient(clientName) {
@@ -111,8 +125,7 @@ export class AssessmentStateManager {
     const clientState = this.clientManager.addClient(
       this.state.clients,
       clientName,
-      this.dataManager.getDefaultScores(),
-      this.sessionManager.getDefaultWorkflowState()
+      this.buildDefaultAssessmentStates()
     );
 
     this.applyClientState(clientState.clients, clientState.activeClient);
@@ -247,7 +260,7 @@ export class AssessmentStateManager {
 
     return {
       ...this.state,
-      assessments: AppConstants.assessments,
+      assessments: this.catalogManager.getAssessments(),
       addClientOptionId: this.clientManager.constructor.addClientOptionId,
       selectedAssessment: this.getSelectedAssessment(),
       selectedClient: this.getSelectedClient(),
@@ -276,19 +289,17 @@ export class AssessmentStateManager {
   }
 
   saveScores() {
-    this.storageManager.saveScores(this.state.scores);
     this.state.clients = this.clientManager.saveClientState(
       this.state.clients,
       this.state.selectedClientId,
+      this.state.selectedAssessmentId,
       this.state.scores,
       this.sessionManager.getCurrentWorkflowState()
     );
   }
 
   getSelectedAssessment() {
-    return AppConstants.assessments.find(
-      (entry) => entry.id === this.state.selectedAssessmentId
-    ) ?? AppConstants.assessments[0];
+    return this.catalogManager.getAssessment(this.state.selectedAssessmentId);
   }
 
   getSelectedClient() {
@@ -303,6 +314,7 @@ export class AssessmentStateManager {
     this.state.clients = this.clientManager.saveClientState(
       this.state.clients,
       this.state.selectedClientId,
+      this.state.selectedAssessmentId,
       this.state.scores,
       this.sessionManager.getCurrentWorkflowState()
     );
@@ -311,11 +323,55 @@ export class AssessmentStateManager {
   applyClientState(clients, activeClient) {
     this.state.clients = clients;
     this.state.selectedClientId = activeClient.id;
+    this.applyClientAssessmentState(activeClient);
+  }
+
+  applyClientAssessmentState(activeClient) {
+    const defaultAssessmentState = this.getDefaultAssessmentState(this.state.selectedAssessmentId);
+    const assessmentState = this.clientManager.getAssessmentState(
+      activeClient,
+      this.state.selectedAssessmentId,
+      defaultAssessmentState
+    );
+
+    this.resetWorkflowSurface();
+    this.sessionManager.initialize(assessmentState.scores, assessmentState.workflow);
+  }
+
+  resetWorkflowSurface() {
     this.state.activeSection = null;
     this.state.currentIndex = 0;
     this.state.mode = "home";
     this.state.checkpointSection = null;
     this.state.isFocusedView = false;
-    this.sessionManager.initialize(activeClient.scores, activeClient.workflow);
+  }
+
+  useAssessmentData(assessmentId) {
+    this.dataManager = this.catalogManager.getDataManager(assessmentId);
+    this.workflowManager.setDataManager(this.dataManager);
+    this.sessionManager.setDataManager(this.dataManager);
+  }
+
+  resolveActiveAssessmentId() {
+    const defaultAssessmentId = this.catalogManager.getDefaultAssessment().id;
+    const savedAssessmentId = this.storageManager.loadActiveAssessmentId(defaultAssessmentId);
+    return this.catalogManager.getAssessment(savedAssessmentId).id;
+  }
+
+  buildDefaultAssessmentStates() {
+    return Object.fromEntries(
+      this.catalogManager.getAssessments().map((assessment) => [
+        assessment.id,
+        this.getDefaultAssessmentState(assessment.id),
+      ])
+    );
+  }
+
+  getDefaultAssessmentState(assessmentId) {
+    const dataManager = this.catalogManager.getDataManager(assessmentId);
+    return {
+      scores: dataManager.getDefaultScores(),
+      workflow: this.sessionManager.getDefaultWorkflowState(),
+    };
   }
 }

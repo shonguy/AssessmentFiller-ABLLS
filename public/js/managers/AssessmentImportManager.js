@@ -1,8 +1,6 @@
-import { AppConstants } from "../constants.js";
-
 export class AssessmentImportManager {
-  constructor(dataManager) {
-    this.dataManager = dataManager;
+  constructor(getDataManager) {
+    this.getDataManager = getDataManager;
   }
 
   importExcel(file, currentScores) {
@@ -34,33 +32,36 @@ export class AssessmentImportManager {
   }
 
   readWorkbookScores(workbook, currentScores) {
-    const metadataWorksheet = workbook.Sheets[AppConstants.workbookTemplate.metadataSheetName];
-    const templateWorksheet = workbook.Sheets[AppConstants.workbookTemplate.worksheetName];
+    const dataManager = this.getDataManager();
+    const workbookTemplate = dataManager.assessment.workbookTemplate;
+    const metadataWorksheet = workbook.Sheets[workbookTemplate.metadataSheetName];
+    const templateWorksheet = workbook.Sheets[workbookTemplate.worksheetName];
 
     if (templateWorksheet) {
       return this.readTemplateBackedWorkbook(
         templateWorksheet,
         metadataWorksheet,
-        currentScores
+        currentScores,
+        dataManager
       );
     }
 
     if (metadataWorksheet) {
-      return this.readMetadataWorksheet(metadataWorksheet, currentScores);
+      return this.readMetadataWorksheet(metadataWorksheet, currentScores, dataManager);
     }
 
     const fallbackWorksheet = this.findWorksheetWithItemIdHeader(workbook);
     if (fallbackWorksheet) {
-      return this.readMetadataWorksheet(fallbackWorksheet, currentScores);
+      return this.readMetadataWorksheet(fallbackWorksheet, currentScores, dataManager);
     }
 
-    throw new Error("Could not find AssessmentFiller data or the ABLLS template sheet.");
+    throw new Error("Could not find AssessmentFiller data or the selected assessment template sheet.");
   }
 
-  readTemplateBackedWorkbook(templateWorksheet, metadataWorksheet, currentScores) {
-    const templateScores = this.readTemplateWorksheet(templateWorksheet, {});
+  readTemplateBackedWorkbook(templateWorksheet, metadataWorksheet, currentScores, dataManager) {
+    const templateScores = this.readTemplateWorksheet(templateWorksheet, {}, dataManager);
     const metadataScores = metadataWorksheet
-      ? this.readMetadataWorksheet(metadataWorksheet, {}).importedScores
+      ? this.readMetadataWorksheet(metadataWorksheet, {}, dataManager).importedScores
       : {};
     const mergedScores = this.mergeTemplateAndMetadataScores(
       templateScores.importedScores,
@@ -76,7 +77,7 @@ export class AssessmentImportManager {
     };
   }
 
-  readMetadataWorksheet(worksheet, currentScores) {
+  readMetadataWorksheet(worksheet, currentScores, dataManager) {
     const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     const importedScores = { ...currentScores };
     const headerIndex = this.findHeaderIndex(rows);
@@ -101,7 +102,7 @@ export class AssessmentImportManager {
       }
 
       const questionId = String(row[0]).trim();
-      const question = this.dataManager.getQuestionById(questionId);
+      const question = dataManager.getQuestionById(questionId);
       if (!question) {
         continue;
       }
@@ -124,12 +125,12 @@ export class AssessmentImportManager {
     return { importedCount, importedScores };
   }
 
-  readTemplateWorksheet(worksheet, currentScores) {
+  readTemplateWorksheet(worksheet, currentScores, dataManager) {
     const importedScores = { ...currentScores };
     let importedCount = 0;
 
-    this.dataManager.questions.forEach((question) => {
-      const scoreMap = this.dataManager.cellMap[question.id];
+    dataManager.questions.forEach((question) => {
+      const scoreMap = dataManager.cellMap[question.id];
       if (!scoreMap) {
         return;
       }

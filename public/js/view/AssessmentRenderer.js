@@ -11,14 +11,10 @@ export class AssessmentRenderer {
   }
 
   render(viewModel) {
-    this.rootElement.classList.toggle("app-focused", viewModel.isFocusedView);
-    this.rootElement.classList.toggle("app-shell", !viewModel.isFocusedView);
+    this.rootElement.classList.remove("app-focused");
+    this.rootElement.classList.toggle("app-shell", true);
+    this.rootElement.classList.toggle("app-focus-mode", viewModel.isFocusedView);
     this.rootElement.classList.toggle("app-sidebar-collapsed", viewModel.isSidebarCollapsed);
-
-    if (viewModel.isFocusedView) {
-      this.rootElement.innerHTML = this.bodyRenderer.render(viewModel);
-      return;
-    }
 
     const bodyHtml = this.bodyRenderer.render(viewModel);
     const pageHtml = viewModel.mode === "home" || viewModel.mode === "checkpoint"

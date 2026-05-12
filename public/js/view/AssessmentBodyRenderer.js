@@ -109,10 +109,10 @@ export class AssessmentBodyRenderer {
         <div class="qdesc">${HtmlEscaper.escape(question.d)}</div>
         <div class="trow">
           ${tierBlocks}
-          <div class="tnone${noneSelected ? " sel" : ""}" data-act="tier" data-id="${question.id}" data-tn="-1">
+          <button class="tnone${noneSelected ? " sel" : ""}" type="button" data-act="tier" data-id="${question.id}" data-tn="-1">
             <span>Ø</span>
             <span class="tnone-label">None</span>
-          </div>
+          </button>
         </div>
         ${answeredHint}
       </div>
@@ -127,9 +127,9 @@ export class AssessmentBodyRenderer {
     const shadow = isExact ? `0 0 24px ${accentColor}22` : "none";
 
     return `
-      <div class="tblk${isSelected ? " sel" : ""}" data-act="tier" data-id="${questionId}" data-tn="${tierNumber}" style="background:${background};border-color:${borderColor};box-shadow:${shadow}">
+      <button class="tblk${isSelected ? " sel" : ""}" type="button" data-act="tier" data-id="${questionId}" data-tn="${tierNumber}" style="background:${background};border-color:${borderColor};box-shadow:${shadow}">
         <div class="ttxt">${HtmlEscaper.escape(tierText)}</div>
-      </div>
+      </button>
     `;
   }
 }

@@ -1,17 +1,16 @@
-import { AppConstants } from "../constants.js";
-
 export class AssessmentDataManager {
-  constructor(questions, cellMap) {
+  constructor(assessment, questions, cellMap) {
+    this.assessment = assessment;
     this.questions = questions;
     this.cellMap = cellMap;
     this.sectionNames = this.buildSectionNames();
     this.sections = Object.keys(this.sectionNames);
   }
 
-  static async load() {
+  static async load(assessment) {
     const [questionsResponse, gridMapResponse] = await Promise.all([
-      fetch(AppConstants.paths.questions),
-      fetch(AppConstants.paths.gridMap),
+      fetch(assessment.paths.questions),
+      fetch(assessment.paths.gridMap),
     ]);
 
     if (!questionsResponse.ok || !gridMapResponse.ok) {
@@ -23,7 +22,7 @@ export class AssessmentDataManager {
       gridMapResponse.json(),
     ]);
 
-    return new AssessmentDataManager(questions, cellMap);
+    return new AssessmentDataManager(assessment, questions, cellMap);
   }
 
   buildSectionNames() {

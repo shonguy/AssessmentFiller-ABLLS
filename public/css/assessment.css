@@ -54,6 +54,9 @@
   transition: all 0.25s;
   display: flex;
   flex-direction: column;
+  color: inherit;
+  font: inherit;
+  text-align: left;
 }
 
 .tblk:hover {
@@ -88,6 +91,8 @@
   transition: all 0.25s;
   flex-direction: column;
   flex: 0 0 110px;
+  color: inherit;
+  font: inherit;
 }
 
 .tnone:hover {

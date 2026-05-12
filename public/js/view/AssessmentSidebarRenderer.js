@@ -12,10 +12,6 @@ export class AssessmentSidebarRenderer {
   }
 
   renderBrand(viewModel) {
-    const toggleLabel = viewModel.isSidebarCollapsed
-      ? "Expand section navigation"
-      : "Collapse section navigation";
-
     return `
       <div class="side-brand">
         <div class="side-mark" style="background:linear-gradient(135deg,${viewModel.accentColor},var(--s3))" aria-hidden="true">A</div>
@@ -23,9 +19,6 @@ export class AssessmentSidebarRenderer {
           <strong>Assessment Filler</strong>
           <span>${HtmlEscaper.escape(viewModel.selectedAssessment.name)}</span>
         </div>
-        <button class="side-collapse" data-act="sideToggle" aria-label="${toggleLabel}" aria-expanded="${!viewModel.isSidebarCollapsed}" aria-controls="assessment-sidebar">
-          ${viewModel.isSidebarCollapsed ? "›" : "‹"}
-        </button>
       </div>
     `;
   }

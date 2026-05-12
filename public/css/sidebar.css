@@ -12,7 +12,7 @@
 
 .side-brand {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr) 44px;
+  grid-template-columns: 36px minmax(0, 1fr);
   gap: 10px;
   align-items: center;
   padding-bottom: 14px;
@@ -50,18 +50,6 @@
 .side-brand-copy span {
   color: var(--tx3);
   font-size: 12px;
-}
-
-.side-collapse {
-  width: 44px;
-  min-width: 44px;
-  height: 44px;
-  border: 1px solid var(--s3);
-  border-radius: 10px;
-  background: var(--s2);
-  color: var(--tx2);
-  cursor: pointer;
-  font-size: 18px;
 }
 
 .side-modes {
@@ -202,35 +190,6 @@
 
 .side-section-name {
   font-size: 12.5px;
-}
-
-.app-sidebar-collapsed .side {
-  padding-inline: 10px;
-}
-
-.app-sidebar-collapsed .side-brand {
-  grid-template-columns: 1fr;
-  justify-items: center;
-}
-
-.app-sidebar-collapsed .side-collapse {
-  display: none;
-}
-
-.app-sidebar-collapsed .side-brand-copy,
-.app-sidebar-collapsed .side-section-head,
-.app-sidebar-collapsed .side-mode-label,
-.app-sidebar-collapsed .side-mode-badge,
-.app-sidebar-collapsed .side-section-name,
-.app-sidebar-collapsed .side-section-count {
-  display: none;
-}
-
-.app-sidebar-collapsed .side-mode,
-.app-sidebar-collapsed .side-section {
-  grid-template-columns: 1fr;
-  justify-items: center;
-  padding-inline: 6px;
 }
 
 @media (max-width: 720px) {

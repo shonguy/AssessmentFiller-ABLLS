@@ -1,6 +1,22 @@
 import { AppConstants } from "../constants.js";
 
 export class StorageManager {
+  loadActiveAssessmentId(defaultAssessmentId) {
+    try {
+      return localStorage.getItem(AppConstants.storageKeys.activeAssessment) ?? defaultAssessmentId;
+    } catch (_error) {
+      return defaultAssessmentId;
+    }
+  }
+
+  saveActiveAssessmentId(assessmentId) {
+    try {
+      localStorage.setItem(AppConstants.storageKeys.activeAssessment, assessmentId);
+    } catch (_error) {
+      // Ignore storage failures.
+    }
+  }
+
   loadClients() {
     try {
       const savedValue = localStorage.getItem(AppConstants.storageKeys.clients);

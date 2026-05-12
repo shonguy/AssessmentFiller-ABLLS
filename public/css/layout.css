@@ -13,7 +13,11 @@
 }
 
 #app.app-sidebar-collapsed {
-  grid-template-columns: 76px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+#app.app-sidebar-collapsed .side {
+  display: none;
 }
 
 .app-main {
@@ -132,6 +136,24 @@
   transition: width 0.4s ease;
 }
 
+#app.app-focus-mode .side,
+#app.app-focus-mode .topbar,
+#app.app-focus-mode .toolbar {
+  opacity: 0.18;
+  filter: saturate(0.65);
+  transition: opacity 0.18s ease, filter 0.18s ease;
+}
+
+#app.app-focus-mode .side:hover,
+#app.app-focus-mode .topbar:hover,
+#app.app-focus-mode .toolbar:hover,
+#app.app-focus-mode .side:focus-within,
+#app.app-focus-mode .topbar:focus-within,
+#app.app-focus-mode .toolbar:focus-within {
+  opacity: 1;
+  filter: none;
+}
+
 .counter {
   font-family: monospace;
   font-size: 14px;
@@ -182,10 +204,6 @@
   #app.app-shell {
     display: block;
     padding: 0;
-  }
-
-  #app.app-sidebar-collapsed .side {
-    display: none;
   }
 
   .app-main {

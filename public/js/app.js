@@ -1,5 +1,5 @@
 import { StorageManager } from "./managers/StorageManager.js";
-import { AssessmentDataManager } from "./managers/AssessmentDataManager.js";
+import { AssessmentCatalogManager } from "./managers/AssessmentCatalogManager.js";
 import { AssessmentExportManager } from "./managers/AssessmentExportManager.js";
 import { AssessmentImportManager } from "./managers/AssessmentImportManager.js";
 import { AssessmentClientManager } from "./managers/AssessmentClientManager.js";
@@ -13,19 +13,23 @@ class AssessmentApp {
     const rootElement = document.getElementById("app");
 
     try {
-      const dataManager = await AssessmentDataManager.load();
+      const catalogManager = await AssessmentCatalogManager.load();
+      const dataManager = catalogManager.getDataManager(catalogManager.getDefaultAssessment().id);
       const storageManager = new StorageManager();
       const clientManager = new AssessmentClientManager(storageManager);
       const workflowManager = new AssessmentWorkflowManager(dataManager);
       const stateManager = new AssessmentStateManager(
-        dataManager,
+        catalogManager,
         storageManager,
         workflowManager,
         clientManager
       );
       const renderer = new AssessmentRenderer(rootElement);
-      const exportManager = new AssessmentExportManager(dataManager, () => stateManager.getState());
-      const importManager = new AssessmentImportManager(dataManager);
+      const exportManager = new AssessmentExportManager(
+        () => stateManager.getDataManager(),
+        () => stateManager.getState()
+      );
+      const importManager = new AssessmentImportManager(() => stateManager.getDataManager());
       const coordinator = new AssessmentCoordinator(
         renderer,
         stateManager,

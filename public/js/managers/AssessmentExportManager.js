@@ -3,14 +3,12 @@ import { FileDownloadHelper } from "../utils.js";
 import { AssessmentWorkbookTemplateManager } from "./AssessmentWorkbookTemplateManager.js";
 
 export class AssessmentExportManager {
-  constructor(dataManager, getState) {
-    this.dataManager = dataManager;
+  constructor(getDataManager, getState) {
+    this.getDataManager = getDataManager;
     this.getState = getState;
     this.jszipLoadPromise = null;
-    this.templateManager = new AssessmentWorkbookTemplateManager(dataManager);
+    this.templateManagers = new Map();
   }
-
-  static excelFilename = "ablls-r-assessment.xlsx";
 
   static excelMimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
@@ -18,6 +16,7 @@ export class AssessmentExportManager {
     const state = this.getState();
     const selectedClient = state.clients?.find((client) => client.id === state.selectedClientId);
     const payload = {
+      assessment: this.getDataManager().assessment.name,
       client: selectedClient?.name,
       exportDate: new Date().toISOString(),
       highlightColor: state.accentColor,
@@ -25,7 +24,7 @@ export class AssessmentExportManager {
     };
 
     FileDownloadHelper.downloadText(
-      "ablls-r-scores.json",
+      `${state.selectedAssessmentId}-scores.json`,
       JSON.stringify(payload, null, 2),
       "application/json"
     );
@@ -35,7 +34,7 @@ export class AssessmentExportManager {
     try {
       await this.ensureExcelExportSupport();
       const excelBlob = await this.buildExcelBlob();
-      FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
+      FileDownloadHelper.downloadBlob(this.getExcelFilename(), excelBlob);
     } catch (error) {
       alert(error.message || "Excel export failed.");
     }
@@ -49,19 +48,19 @@ export class AssessmentExportManager {
       excelBlob = await this.buildExcelBlob();
       const excelFile = new File(
         [excelBlob],
-        AssessmentExportManager.excelFilename,
+        this.getExcelFilename(),
         { type: AssessmentExportManager.excelMimeType }
       );
 
       if (!this.canShareFiles([excelFile])) {
-        FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
+        FileDownloadHelper.downloadBlob(this.getExcelFilename(), excelBlob);
         alert("Sharing is not supported here, so the export was downloaded instead.");
         return;
       }
 
       await navigator.share({
         files: [excelFile],
-        title: AssessmentExportManager.excelFilename,
+        title: this.getExcelFilename(),
       });
     } catch (error) {
       if (error?.name === "AbortError") {
@@ -69,7 +68,7 @@ export class AssessmentExportManager {
       }
 
       if (excelBlob) {
-        FileDownloadHelper.downloadBlob(AssessmentExportManager.excelFilename, excelBlob);
+        FileDownloadHelper.downloadBlob(this.getExcelFilename(), excelBlob);
         alert("Sharing failed, so the export was downloaded instead.");
         return;
       }
@@ -80,10 +79,29 @@ export class AssessmentExportManager {
 
   async buildExcelBlob() {
     const state = this.getState();
-    return this.templateManager.buildWorkbookBlob(state.scores, {
-      assessmentCode: AppConstants.workbookTemplate.defaultAssessmentCode,
+    const selectedClient = state.clients?.find((client) => client.id === state.selectedClientId);
+
+    return this.getTemplateManager().buildWorkbookBlob(state.scores, {
+      assessmentCode: this.getDataManager().assessment.workbookTemplate.defaultAssessmentCode,
       assessmentDate: new Date(),
+      clientName: selectedClient?.name,
     });
+  }
+
+  getExcelFilename() {
+    return this.getDataManager().assessment.exportFilename;
+  }
+
+  getTemplateManager() {
+    const dataManager = this.getDataManager();
+    if (!this.templateManagers.has(dataManager.assessment.id)) {
+      this.templateManagers.set(
+        dataManager.assessment.id,
+        new AssessmentWorkbookTemplateManager(dataManager)
+      );
+    }
+
+    return this.templateManagers.get(dataManager.assessment.id);
   }
 
   canShareFiles(files) {

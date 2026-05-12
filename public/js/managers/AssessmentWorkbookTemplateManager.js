@@ -1,4 +1,3 @@
-import { AppConstants } from "../constants.js";
 import { AssessmentWorkbookArchiveManager } from "./AssessmentWorkbookArchiveManager.js";
 
 export class AssessmentWorkbookTemplateManager {
@@ -8,19 +7,20 @@ export class AssessmentWorkbookTemplateManager {
   }
 
   async buildWorkbookBlob(scores, options = {}) {
-    const zip = await this.archiveManager.loadTemplateZip(AppConstants.paths.workbookTemplate);
+    const template = this.getWorkbookTemplate();
+    const zip = await this.archiveManager.loadTemplateZip(this.dataManager.assessment.paths.workbookTemplate);
     const assessmentCode = this.resolveAssessmentCode(options.assessmentCode);
     const assessmentDate = options.assessmentDate ?? new Date();
     const worksheetPath = await this.archiveManager.resolveWorksheetPath(
       zip,
-      AppConstants.workbookTemplate.worksheetName
+      template.worksheetName
     );
     const worksheetDocument = await this.archiveManager.loadXmlDocument(zip, worksheetPath);
     const worksheetState = this.archiveManager.buildWorksheetState(worksheetDocument);
 
     this.clearAssessmentMetadata(worksheetState);
     this.clearScores(worksheetState);
-    this.applyAssessmentMetadata(worksheetState, assessmentCode, assessmentDate);
+    this.applyAssessmentMetadata(worksheetState, assessmentCode, assessmentDate, { ...options, scores });
     this.applyScores(worksheetState, scores, assessmentCode);
     zip.file(worksheetPath, this.archiveManager.serializeXmlDocument(worksheetDocument));
     return zip.generateAsync({ type: "blob" });
@@ -28,7 +28,7 @@ export class AssessmentWorkbookTemplateManager {
 
   resolveAssessmentCode(assessmentCode) {
     const normalizedCode = Number.parseInt(assessmentCode, 10);
-    const { defaultAssessmentCode, runSlotRows } = AppConstants.workbookTemplate;
+    const { defaultAssessmentCode, runSlotRows } = this.getWorkbookTemplate();
 
     if (Number.isNaN(normalizedCode) || normalizedCode < 1 || normalizedCode > runSlotRows.length) {
       return defaultAssessmentCode;
@@ -38,7 +38,7 @@ export class AssessmentWorkbookTemplateManager {
   }
 
   getRunSlotRow(assessmentCode) {
-    return AppConstants.workbookTemplate.runSlotRows[assessmentCode - 1];
+    return this.getWorkbookTemplate().runSlotRows[assessmentCode - 1];
   }
 
   buildExcelDateValue(assessmentDate) {
@@ -58,13 +58,16 @@ export class AssessmentWorkbookTemplateManager {
   }
 
   clearAssessmentMetadata(worksheetState) {
-    AppConstants.workbookTemplate.runSlotRows.forEach((row) => {
-      const cellAddress = `I${row}`;
+    const template = this.getWorkbookTemplate();
+    const clearColumns = [template.dateColumn, template.scoreColumn].filter(Boolean);
 
-      if (this.archiveManager.hasCell(worksheetState, cellAddress)) {
-        this.archiveManager.clearCellValue(worksheetState, cellAddress);
-      }
+    template.runSlotRows.forEach((row) => {
+      clearColumns.forEach((column) => this.clearOptionalCell(worksheetState, `${column}${row}`));
     });
+
+    if (template.clientNameCell) {
+      this.clearOptionalCell(worksheetState, template.clientNameCell);
+    }
   }
 
   clearScores(worksheetState) {
@@ -119,11 +122,50 @@ export class AssessmentWorkbookTemplateManager {
     });
   }
 
-  applyAssessmentMetadata(worksheetState, assessmentCode, assessmentDate) {
-    this.archiveManager.writeNumericCell(
-      worksheetState,
-      `I${this.getRunSlotRow(assessmentCode)}`,
-      this.buildExcelDateValue(assessmentDate)
+  applyAssessmentMetadata(worksheetState, assessmentCode, assessmentDate, options) {
+    const template = this.getWorkbookTemplate();
+    const runSlotRow = this.getRunSlotRow(assessmentCode);
+
+    if (template.dateColumn) {
+      this.archiveManager.writeNumericCell(
+        worksheetState,
+        `${template.dateColumn}${runSlotRow}`,
+        this.buildExcelDateValue(assessmentDate)
+      );
+    }
+
+    if (template.scoreColumn) {
+      this.archiveManager.writeNumericCell(
+        worksheetState,
+        `${template.scoreColumn}${runSlotRow}`,
+        this.calculateScoreTotal(options.scores ?? {})
+      );
+    }
+
+    if (template.clientNameCell && options.clientName) {
+      this.archiveManager.writeInlineStringCell(
+        worksheetState,
+        template.clientNameCell,
+        options.clientName,
+        template.clientNameStyleCell
+      );
+    }
+  }
+
+  calculateScoreTotal(scores) {
+    return this.dataManager.questions.reduce(
+      (total, question) => total + this.normalizeScore(scores[question.id], question.t.length),
+      0
     );
+  }
+
+  clearOptionalCell(worksheetState, cellAddress) {
+    if (this.archiveManager.hasCell(worksheetState, cellAddress)) {
+      this.archiveManager.clearCellValue(worksheetState, cellAddress);
+    }
+  }
+
+  getWorkbookTemplate() {
+    return this.dataManager.assessment.workbookTemplate;
   }
 }

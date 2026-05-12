@@ -1,11 +1,6 @@
-.app-focused {
-  max-width: none !important;
-  padding: 0 !important;
-}
-
 .focused-shell {
-  min-height: 100dvh;
-  padding: 14px 14px 18px;
+  min-height: calc(100dvh - 210px);
+  padding: 14px 0 18px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -83,11 +78,14 @@
 .focused-section {
   display: inline-flex;
   margin-bottom: 12px;
-  color: var(--tx3);
-  background: var(--s1);
-  border: 1px solid var(--s3);
+  color: var(--tx);
+  background: color-mix(in srgb, var(--accent) 20%, var(--s1));
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--s3));
   border-radius: 999px;
   padding: 7px 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
 .focused-question {

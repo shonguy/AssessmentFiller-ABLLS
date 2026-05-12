@@ -3,6 +3,10 @@ export class AssessmentWorkflowManager {
     this.dataManager = dataManager;
   }
 
+  setDataManager(dataManager) {
+    this.dataManager = dataManager;
+  }
+
   getQuestionQueue(activeSection, questionFilter, scores) {
     const questions = this.dataManager.getFilteredQuestions(activeSection);
     if (questionFilter !== "unanswered") {
