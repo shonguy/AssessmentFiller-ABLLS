@@ -33,7 +33,32 @@ export class AssessmentCoordinator {
       return;
     }
 
+    if (this.handleManagementAction(actionElement)) {
+      return;
+    }
+
     this.actionHandler.handle(actionElement);
+  }
+
+  handleManagementAction(actionElement) {
+    const action = actionElement.dataset.act;
+
+    if (action === "renameClient") {
+      this.renameSelectedClient();
+      return true;
+    }
+
+    if (action === "deleteClient") {
+      this.deleteSelectedClient();
+      return true;
+    }
+
+    if (action === "deleteAssessment") {
+      this.deleteSelectedAssessment();
+      return true;
+    }
+
+    return false;
   }
 
   handleOutsideClick(event) {
@@ -104,6 +129,34 @@ export class AssessmentCoordinator {
     }
 
     this.stateManager.setSelectedClient(selectElement.value);
+    this.render();
+  }
+
+  renameSelectedClient() {
+    const selectedClient = this.stateManager.getSelectedClient();
+    const clientName = window.prompt("Client name", selectedClient?.name ?? "Client");
+    if (clientName && clientName.trim()) {
+      this.stateManager.renameSelectedClient(clientName);
+    }
+    this.render();
+  }
+
+  deleteSelectedClient() {
+    const selectedClient = this.stateManager.getSelectedClient();
+    const message = `Are you sure? Delete ${selectedClient?.name ?? "this client"} and all saved assessments?`;
+    if (window.confirm(message)) {
+      this.stateManager.deleteSelectedClient();
+    }
+    this.render();
+  }
+
+  deleteSelectedAssessment() {
+    const selectedAssessment = this.stateManager.getSelectedAssessment();
+    const selectedClient = this.stateManager.getSelectedClient();
+    const message = `Are you sure? Delete saved ${selectedAssessment.name} data for ${selectedClient?.name ?? "this client"}?`;
+    if (window.confirm(message)) {
+      this.stateManager.deleteSelectedAssessment();
+    }
     this.render();
   }
 

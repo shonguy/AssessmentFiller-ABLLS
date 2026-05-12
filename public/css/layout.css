@@ -107,6 +107,28 @@
   font-weight: 600;
 }
 
+.management-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.management-btn {
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid var(--s3);
+  border-radius: 10px;
+  background: var(--s1);
+  color: var(--tx2);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.management-btn.danger {
+  color: var(--red);
+}
+
 .topbar-right {
   display: flex;
   align-items: center;
@@ -237,6 +259,11 @@
   .assessment-picker select {
     max-width: 150px;
     min-width: 0;
+  }
+
+  .management-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 
   .topbar-right {

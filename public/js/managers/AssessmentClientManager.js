@@ -1,10 +1,8 @@
 export class AssessmentClientManager {
   static addClientOptionId = "__add_client__";
-
   constructor(storageManager) {
     this.storageManager = storageManager;
   }
-
   initialize(defaultAssessmentStates) {
     let clients = this.normalizeClients(
       this.storageManager.loadClients(),
@@ -18,11 +16,9 @@ export class AssessmentClientManager {
       )];
       this.storageManager.saveClients(clients);
     }
-
     const savedClientId = this.storageManager.loadActiveClientId();
     const activeClient = this.findClient(clients, savedClientId) ?? clients[0];
     this.storageManager.saveActiveClientId(activeClient.id);
-
     return { clients, activeClient };
   }
 
@@ -34,6 +30,38 @@ export class AssessmentClientManager {
     this.storageManager.saveActiveClientId(client.id);
 
     return { clients: nextClients, activeClient: client };
+  }
+
+  renameClient(clients, clientId, clientName) {
+    const nextClients = clients.map((client, index) => client.id === clientId
+      ? { ...client, name: this.normalizeClientName(clientName, index + 1) }
+      : client);
+    this.storageManager.saveClients(nextClients);
+    return { clients: nextClients, activeClient: this.findClient(nextClients, clientId) };
+  }
+
+  deleteClient(clients, clientId, defaultAssessmentStates) {
+    const deletedIndex = Math.max(clients.findIndex((client) => client.id === clientId), 0);
+    const remainingClients = clients.filter((client) => client.id !== clientId);
+    const nextClients = remainingClients.length > 0
+      ? remainingClients
+      : [this.createClient("Client 1", defaultAssessmentStates)];
+    const activeClient = nextClients[Math.min(deletedIndex, nextClients.length - 1)];
+    this.storageManager.saveClients(nextClients);
+    this.storageManager.saveActiveClientId(activeClient.id);
+    return { clients: nextClients, activeClient };
+  }
+
+  deleteAssessmentState(clients, clientId, assessmentId, defaultAssessmentState) {
+    const nextClients = clients.map((client) => client.id === clientId ? {
+      ...client,
+      assessments: {
+        ...client.assessments,
+        [assessmentId]: this.cloneAssessmentState(defaultAssessmentState),
+      },
+    } : client);
+    this.storageManager.saveClients(nextClients);
+    return nextClients;
   }
 
   saveClientState(clients, clientId, assessmentId, scores, workflowState) {
@@ -144,12 +172,16 @@ export class AssessmentClientManager {
     return Object.fromEntries(
       Object.entries(assessmentStates).map(([assessmentId, state]) => [
         assessmentId,
-        {
-          scores: { ...state.scores },
-          workflow: { ...state.workflow },
-        },
+        this.cloneAssessmentState(state),
       ])
     );
+  }
+
+  cloneAssessmentState(state) {
+    return {
+      scores: { ...state.scores },
+      workflow: { ...state.workflow },
+    };
   }
 
   normalizeClientName(name, fallbackNumber) {

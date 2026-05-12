@@ -66,12 +66,19 @@ export class AssessmentRenderer {
                 <option value="${viewModel.addClientOptionId}">+ Add Client</option>
               </select>
             </label>
+            <div class="management-actions" aria-label="Client actions">
+              <button class="management-btn" data-act="renameClient" type="button">Rename</button>
+              <button class="management-btn danger" data-act="deleteClient" type="button">Delete Client</button>
+            </div>
             <label class="assessment-picker">
               <span>Assessment</span>
               <select data-act="assessment" aria-label="Assessment">
                 ${assessmentOptions}
               </select>
             </label>
+            <div class="management-actions" aria-label="Assessment actions">
+              <button class="management-btn danger" data-act="deleteAssessment" type="button">Delete Assessment</button>
+            </div>
           </div>
         </div>
         <div class="topbar-right">

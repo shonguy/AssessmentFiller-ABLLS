@@ -1,6 +1,5 @@
 import { AppConstants } from "../constants.js";
 import { AssessmentSessionManager } from "./AssessmentSessionManager.js";
-
 export class AssessmentStateManager {
   constructor(catalogManager, storageManager, workflowManager, clientManager) {
     this.catalogManager = catalogManager;
@@ -129,6 +128,29 @@ export class AssessmentStateManager {
     );
 
     this.applyClientState(clientState.clients, clientState.activeClient);
+  }
+
+  renameSelectedClient(clientName) {
+    const clientState = this.clientManager.renameClient(this.state.clients, this.state.selectedClientId, clientName);
+    this.state.clients = clientState.clients;
+    this.state.selectedClientId = clientState.activeClient?.id ?? this.state.selectedClientId;
+  }
+
+  deleteSelectedClient() {
+    const clientState = this.clientManager.deleteClient(this.state.clients, this.state.selectedClientId, this.buildDefaultAssessmentStates());
+    this.applyClientState(clientState.clients, clientState.activeClient);
+  }
+
+  deleteSelectedAssessment() {
+    const defaultAssessmentState = this.getDefaultAssessmentState(this.state.selectedAssessmentId);
+    this.state.clients = this.clientManager.deleteAssessmentState(
+      this.state.clients,
+      this.state.selectedClientId,
+      this.state.selectedAssessmentId,
+      defaultAssessmentState
+    );
+    this.resetWorkflowSurface();
+    this.sessionManager.initialize({ ...defaultAssessmentState.scores }, { ...defaultAssessmentState.workflow });
   }
 
   setSelectedClient(clientId) {
