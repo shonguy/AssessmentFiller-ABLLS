@@ -1,3 +1,5 @@
+import { AssessmentWorkbookSheetSelector } from "./AssessmentWorkbookSheetSelector.js";
+
 export class AssessmentImportManager {
   constructor(getDataManager) {
     this.getDataManager = getDataManager;
@@ -35,7 +37,8 @@ export class AssessmentImportManager {
     const dataManager = this.getDataManager();
     const workbookTemplate = dataManager.assessment.workbookTemplate;
     const metadataWorksheet = workbook.Sheets[workbookTemplate.metadataSheetName];
-    const templateWorksheet = workbook.Sheets[workbookTemplate.worksheetName];
+    const templateWorksheet = new AssessmentWorkbookSheetSelector(dataManager)
+      .selectTemplateWorksheet(workbook, workbookTemplate.worksheetName);
 
     if (templateWorksheet) {
       return this.readTemplateBackedWorkbook(
@@ -140,7 +143,9 @@ export class AssessmentImportManager {
           c: columnNumber - 1,
           r: scoreMap.row - 1,
         });
-        return total + (this.isFilledTemplateCell(worksheet[cellAddress]) ? 1 : 0);
+        return total + (
+          AssessmentWorkbookSheetSelector.isFilledTemplateCell(worksheet[cellAddress]) ? 1 : 0
+        );
       }, 0);
 
       if (importedScore > 0) {
@@ -191,10 +196,5 @@ export class AssessmentImportManager {
     }
 
     return headerRow.findIndex((value) => value === columnName);
-  }
-
-  isFilledTemplateCell(cell) {
-    const normalizedValue = Number(cell?.v);
-    return Number.isFinite(normalizedValue) && normalizedValue > 0;
   }
 }
